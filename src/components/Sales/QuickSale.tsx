@@ -3,7 +3,7 @@ import { Minus, Plus, ShoppingCart, Search } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
 export function QuickSale() {
-  const { products, updateProduct, addSale } = useApp();
+  const { products, addBulkSales } = useApp();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [cart, setCart] = useState<{[key: string]: number}>({});
@@ -41,29 +41,27 @@ export function QuickSale() {
   };
 
   const processSale = () => {
-    Object.entries(cart).forEach(([productId, quantity]) => {
-      if (quantity > 0) {
+    const salesData = Object.entries(cart)
+      .filter(([_, quantity]) => quantity > 0)
+      .map(([productId, quantity]) => {
         const product = products.find(p => p.id === productId);
-        if (product) {
-          // Add sale record
-          addSale({
-            productId: product.id,
-            productName: product.name,
-            quantity,
-            unitPrice: product.sellingPrice,
-            totalPrice: product.sellingPrice * quantity,
-          });
-          
-          // Update product quantity
-          updateProduct(productId, {
-            quantity: product.quantity - quantity
-          });
-        }
-      }
-    });
+        if (!product) return null;
+        
+        return {
+          productId: product.id,
+          productName: product.name,
+          quantity,
+          unitPrice: product.sellingPrice,
+          totalPrice: product.sellingPrice * quantity,
+        };
+      })
+      .filter(sale => sale !== null);
     
-    setCart({});
-    alert('تم تسجيل المبيعة بنجاح!');
+    if (salesData.length > 0) {
+      addBulkSales(salesData);
+      setCart({});
+      alert('تم تسجيل المبيعة بنجاح!');
+    }
   };
 
   const getTotalAmount = () => {
