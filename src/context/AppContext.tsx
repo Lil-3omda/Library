@@ -1,6 +1,8 @@
-import React, { createContext, useContext, ReactNode, useState } from 'react';
+import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { Product, Sale, Category } from '../types';
 import { defaultCategories } from '../data/categories';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+import { JSONFileManager } from '../utils/jsonFileManager';
 
 interface AppContextType {
   products: Product[];
@@ -13,7 +15,10 @@ interface AppContextType {
   updateProduct: (id: string, product: Partial<Product>) => void;
   deleteProduct: (id: string) => void;
   addSale: (sale: Omit<Sale, 'id' | 'date'>) => void;
+  addBulkSales: (sales: Array<Omit<Sale, 'id' | 'date'>>) => void;
   getLowStockProducts: () => Product[];
+  exportToJSON: () => void;
+  importFromJSON: (jsonData: any) => void;
   isLoading: boolean;
   error: string | null;
 }
@@ -21,11 +26,17 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [sales, setSales] = useState<Sale[]>([]);
-  const [categories, setCategories] = useState<Category[]>(defaultCategories);
+  const [products, setProducts] = useLocalStorage<Product[]>('inventory_products', []);
+  const [sales, setSales] = useLocalStorage<Sale[]>('inventory_sales', []);
+  const [categories, setCategories] = useLocalStorage<Category[]>('inventory_categories', defaultCategories);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const jsonManager = JSONFileManager.getInstance();
+
+  // Auto-save to JSON files whenever data changes
+  useEffect(() => {
+    jsonManager.autoSave(products, sales, categories);
+  }, [products, sales, categories]);
 
   const addProduct = (productData: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => {
     const now = new Date().toISOString();
@@ -58,14 +69,76 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
     setSales(prev => [...prev, newSale]);
     
-    // Update product quantity
-    updateProduct(saleData.productId, {
-      quantity: products.find(p => p.id === saleData.productId)!.quantity - saleData.quantity
-    });
+    // Update product quantity - fix the closure issue
+    setProducts(prev => prev.map(product => 
+      product.id === saleData.productId 
+        ? { ...product, quantity: product.quantity - saleData.quantity, updatedAt: new Date().toISOString() }
+        : product
+    ));
+  };
+
+  const addBulkSales = (salesData: Array<Omit<Sale, 'id' | 'date'>>) => {
+    const now = new Date().toISOString();
+    const newSales: Sale[] = salesData.map((sale, index) => ({
+      ...sale,
+      id: (Date.now() + index).toString(),
+      date: now,
+    }));
+    
+    setSales(prev => [...prev, ...newSales]);
+    
+    // Update product quantities for all items in bulk
+    setProducts(prev => prev.map(product => {
+      const saleForProduct = salesData.find(sale => sale.productId === product.id);
+      if (saleForProduct) {
+        return {
+          ...product,
+          quantity: product.quantity - saleForProduct.quantity,
+          updatedAt: now
+        };
+      }
+      return product;
+    }));
   };
 
   const getLowStockProducts = () => {
     return products.filter(product => product.quantity <= product.minQuantity);
+  };
+
+  const exportToJSON = () => {
+    const data = {
+      products: products,
+      sales: sales,
+      categories: categories,
+      exportDate: new Date().toISOString()
+    };
+    
+    const filename = jsonManager.generateBackupFilename('inventory_backup');
+    jsonManager.exportJSON(data, filename);
+  };
+
+  const importFromJSON = (jsonData: any) => {
+    try {
+      if (!jsonManager.validateJSONData(jsonData)) {
+        setError('ملف JSON غير صالح');
+        return;
+      }
+      
+      if (jsonData.products) {
+        setProducts(jsonData.products);
+      }
+      if (jsonData.sales) {
+        setSales(jsonData.sales);
+      }
+      if (jsonData.categories) {
+        setCategories(jsonData.categories);
+      }
+      
+      setError(null);
+    } catch (error) {
+      console.error('Error importing JSON data:', error);
+      setError('خطأ في استيراد البيانات');
+    }
   };
 
   return (
@@ -80,7 +153,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       updateProduct,
       deleteProduct,
       addSale,
+      addBulkSales,
       getLowStockProducts,
+      exportToJSON,
+      importFromJSON,
       isLoading,
       error,
     }}>
