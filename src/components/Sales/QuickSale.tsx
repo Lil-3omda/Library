@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Minus, Plus, ShoppingCart, Search } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { BarcodeLookup } from '../Barcode/BarcodeLookup';
+import { Product } from '../../types';
 
 export function QuickSale() {
   const { products, addBulkSales } = useApp();
@@ -17,17 +19,23 @@ export function QuickSale() {
 
   const categories = [...new Set(products.map(p => p.category))];
 
-  const addToCart = (productId: string) => {
+  const addToCart = (productId: string, quantity: number = 1) => {
     const product = products.find(p => p.id === productId);
     if (!product) return;
     
     const currentQuantity = cart[productId] || 0;
-    if (currentQuantity < product.quantity) {
+    const newQuantity = currentQuantity + quantity;
+    
+    if (newQuantity <= product.quantity) {
       setCart(prev => ({
         ...prev,
-        [productId]: currentQuantity + 1
+        [productId]: newQuantity
       }));
     }
+  };
+
+  const handleProductFound = (product: Product) => {
+    addToCart(product.id, 1);
   };
 
   const removeFromCart = (productId: string) => {
@@ -106,6 +114,12 @@ export function QuickSale() {
           </select>
         </div>
       </div>
+
+      {/* Barcode Lookup Section */}
+      <BarcodeLookup 
+        onProductFound={handleProductFound}
+        autoOpenSale={true}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Products Grid */}
