@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Edit, Trash2, Search, Package } from 'lucide-react';
+import { Edit, Trash2, Search, Package, Scan } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Product } from '../../types';
 import { ProductForm } from './ProductForm';
+import { BarcodeLookup } from '../Barcode/BarcodeLookup';
 
 export function ProductList() {
   const { products, deleteProduct, categories } = useApp();
@@ -33,6 +34,11 @@ export function ProductList() {
     if (product.quantity === 0) return { status: 'نفد المخزون', color: 'text-red-600 bg-red-100' };
     if (product.quantity <= product.minQuantity) return { status: 'مخزون منخفض', color: 'text-yellow-600 bg-yellow-100' };
     return { status: 'متوفر', color: 'text-green-600 bg-green-100' };
+  };
+
+  const handleProductFound = (product: Product) => {
+    setEditingProduct(product);
+    setShowForm(true);
   };
 
   return (
@@ -66,6 +72,17 @@ export function ProductList() {
           </select>
         </div>
       </div>
+
+      {/* Barcode Lookup for Quick Product Access */}
+      <BarcodeLookup 
+        onProductFound={handleProductFound}
+        onProductNotFound={(barcode) => {
+          if (window.confirm(`المنتج بالباركود "${barcode}" غير موجود. هل تريد إضافة منتج جديد؟`)) {
+            setEditingProduct(null);
+            setShowForm(true);
+          }
+        }}
+      />
 
       {filteredProducts.length === 0 ? (
         <div className="text-center py-12">

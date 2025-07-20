@@ -17,6 +17,7 @@ interface AppContextType {
   addSale: (sale: Omit<Sale, 'id' | 'date'>) => void;
   addBulkSales: (sales: Array<Omit<Sale, 'id' | 'date'>>) => void;
   getLowStockProducts: () => Product[];
+  findProductByBarcode: (barcode: string) => Product | undefined;
   exportToJSON: () => void;
   importFromJSON: (jsonData: any) => void;
   isLoading: boolean;
@@ -105,6 +106,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return products.filter(product => product.quantity <= product.minQuantity);
   };
 
+  const findProductByBarcode = (barcode: string) => {
+    return products.find(product => product.barcode === barcode);
+  };
+
   const exportToJSON = () => {
     const data = {
       products: products,
@@ -155,6 +160,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       addSale,
       addBulkSales,
       getLowStockProducts,
+      findProductByBarcode,
       exportToJSON,
       importFromJSON,
       isLoading,

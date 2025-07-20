@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Save, X } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Product } from '../../types';
+import { BarcodeInput } from '../Barcode/BarcodeInput';
+import { BarcodeGenerator } from '../Barcode/BarcodeGenerator';
 
 interface ProductFormProps {
   product?: Product;
@@ -173,12 +175,9 @@ export function ProductForm({ product, onClose }: ProductFormProps) {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 الباركود
               </label>
-              <input
-                type="text"
-                name="barcode"
+              <BarcodeInput
                 value={formData.barcode}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onChange={(value) => setFormData(prev => ({ ...prev, barcode: value }))}
                 placeholder="رقم الباركود"
               />
             </div>
@@ -197,6 +196,16 @@ export function ProductForm({ product, onClose }: ProductFormProps) {
               placeholder="وصف المنتج"
             />
           </div>
+
+          {/* Barcode Generator */}
+          {formData.barcode && (
+            <div>
+              <BarcodeGenerator
+                value={formData.barcode}
+                onGenerate={(barcode) => setFormData(prev => ({ ...prev, barcode }))}
+              />
+            </div>
+          )}
 
           <div className="flex gap-4 pt-4">
             <button
