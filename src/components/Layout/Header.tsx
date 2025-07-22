@@ -2,18 +2,47 @@ import React, { useState } from 'react';
 import { Bell, User, Scan } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { BarcodeScanner } from '../Barcode/BarcodeScanner';
+import { BarcodeNotification } from '../Barcode/BarcodeNotification';
 
 export function Header() {
   const { getLowStockProducts, findProductByBarcode } = useApp();
   const [showQuickScan, setShowQuickScan] = useState(false);
+  const [notification, setNotification] = useState<{
+    type: 'success' | 'error' | 'warning' | 'info';
+    title: string;
+    message: string;
+    isVisible: boolean;
+  }>({
+    type: 'info',
+    title: '',
+    message: '',
+    isVisible: false
+  });
   const lowStockCount = getLowStockProducts().length;
+
+  const showNotification = (type: 'success' | 'error' | 'warning' | 'info', title: string, message: string) => {
+    setNotification({
+      type,
+      title,
+      message,
+      isVisible: true
+    });
+  };
 
   const handleQuickScan = (barcode: string) => {
     const product = findProductByBarcode(barcode);
     if (product) {
-      alert(`تم العثور على المنتج: ${product.name}\nالكمية المتوفرة: ${product.quantity}\nسعر البيع: ${product.sellingPrice} د.ع`);
+      showNotification(
+        'success',
+        'تم العثور على المنتج',
+        `${product.name}\nالكمية: ${product.quantity}\nالسعر: ${product.sellingPrice} د.ع`
+      );
     } else {
-      alert(`لم يتم العثور على منتج بالباركود: ${barcode}`);
+      showNotification(
+        'error',
+        'لم يتم العثور على المنتج',
+        `لا يوجد منتج بالباركود: ${barcode}`
+      );
     }
     setShowQuickScan(false);
   };
@@ -57,6 +86,14 @@ export function Header() {
         onBarcodeDetected={handleQuickScan}
         onClose={() => setShowQuickScan(false)}
         title="مسح سريع للباركود"
+      />
+      
+      <BarcodeNotification
+        type={notification.type}
+        title={notification.title}
+        message={notification.message}
+        isVisible={notification.isVisible}
+        onClose={() => setNotification(prev => ({ ...prev, isVisible: false }))}
       />
     </header>
   );
