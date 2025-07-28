@@ -14,7 +14,7 @@ export function ProductList() {
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.barcode?.includes(searchTerm);
+                         (product.barcode && product.barcode.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesCategory = !selectedCategory || product.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -37,10 +37,31 @@ export function ProductList() {
   };
 
   const handleProductFound = (product: Product) => {
+    // When product is found via barcode, open it for editing
     setEditingProduct(product);
     setShowForm(true);
   };
 
+  const handleProductNotFound = (barcode: string) => {
+    if (window.confirm(`المنتج بالباركود "${barcode}" غير موجود. هل تريد إضافة منتج جديد بهذا الباركود؟`)) {
+      // Create a new product with the scanned barcode
+      setEditingProduct({
+        id: '',
+        name: '',
+        category: '',
+        quantity: 0,
+        minQuantity: 5,
+        costPrice: 0,
+        sellingPrice: 0,
+        supplier: '',
+        barcode: barcode,
+        description: '',
+        createdAt: '',
+        updatedAt: ''
+      } as Product);
+      setShowForm(true);
+    }
+  };
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
@@ -76,12 +97,7 @@ export function ProductList() {
       {/* Barcode Lookup for Quick Product Access */}
       <BarcodeLookup 
         onProductFound={handleProductFound}
-        onProductNotFound={(barcode) => {
-          if (window.confirm(`المنتج بالباركود "${barcode}" غير موجود. هل تريد إضافة منتج جديد؟`)) {
-            setEditingProduct(null);
-            setShowForm(true);
-          }
-        }}
+        onProductNotFound={handleProductNotFound}
       />
 
       {filteredProducts.length === 0 ? (

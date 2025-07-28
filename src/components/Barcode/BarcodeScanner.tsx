@@ -155,9 +155,11 @@ export function BarcodeScanner({
 
       Quagga.onDetected((result) => {
         const code = result.codeResult.code;
-        if (code && code !== detectedBarcode && code.length > 3) {
-          setDetectedBarcode(code);
-          onBarcodeDetected(code);
+        // Clean and validate the detected code
+        const cleanCode = code ? code.trim() : '';
+        if (cleanCode && cleanCode !== detectedBarcode && cleanCode.length >= 3) {
+          setDetectedBarcode(cleanCode);
+          onBarcodeDetected(cleanCode);
           
           // Vibrate if supported
           if (navigator.vibrate) {
@@ -200,9 +202,11 @@ export function BarcodeScanner({
       await reader.decodeFromConstraints(constraints, videoRef.current, (result, error) => {
         if (result) {
           const code = result.getText();
-          if (code && code !== detectedBarcode && code.length > 3) {
-            setDetectedBarcode(code);
-            onBarcodeDetected(code);
+          // Clean and validate the detected code
+          const cleanCode = code ? code.trim() : '';
+          if (cleanCode && cleanCode !== detectedBarcode && cleanCode.length >= 3) {
+            setDetectedBarcode(cleanCode);
+            onBarcodeDetected(cleanCode);
             
             if (navigator.vibrate) {
               navigator.vibrate([200, 100, 200]);

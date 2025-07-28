@@ -10,6 +10,7 @@ interface BarcodeInputProps {
   showScanner?: boolean;
   showGenerator?: boolean;
   onScan?: (barcode: string) => void;
+  allowGeneration?: boolean;
 }
 
 export function BarcodeInput({
@@ -19,7 +20,8 @@ export function BarcodeInput({
   disabled = false,
   showScanner = true,
   showGenerator = true,
-  onScan
+  onScan,
+  allowGeneration = true
 }: BarcodeInputProps) {
   const [showScannerModal, setShowScannerModal] = useState(false);
 
@@ -32,6 +34,8 @@ export function BarcodeInput({
   };
 
   const generateBarcode = () => {
+    if (!allowGeneration) return;
+    
     // Generate a simple random barcode
     const timestamp = Date.now().toString();
     const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
@@ -64,7 +68,7 @@ export function BarcodeInput({
             </button>
           )}
           
-          {showGenerator && (
+          {showGenerator && allowGeneration && (
             <button
               type="button"
               onClick={generateBarcode}

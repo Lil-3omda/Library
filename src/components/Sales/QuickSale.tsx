@@ -12,7 +12,7 @@ export function QuickSale() {
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.barcode?.includes(searchTerm);
+                         (product.barcode && product.barcode.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesCategory = !selectedCategory || product.category === selectedCategory;
     return matchesSearch && matchesCategory && product.quantity > 0;
   });
@@ -35,9 +35,13 @@ export function QuickSale() {
   };
 
   const handleProductFound = (product: Product) => {
+    // Add product to cart when found via barcode
     addToCart(product.id, 1);
   };
 
+  const handleProductNotFound = (barcode: string) => {
+    alert(`لم يتم العثور على منتج بالباركود: ${barcode}`);
+  };
   const removeFromCart = (productId: string) => {
     const currentQuantity = cart[productId] || 0;
     if (currentQuantity > 0) {
@@ -118,6 +122,7 @@ export function QuickSale() {
       {/* Barcode Lookup Section */}
       <BarcodeLookup 
         onProductFound={handleProductFound}
+        onProductNotFound={handleProductNotFound}
         autoOpenSale={true}
       />
 

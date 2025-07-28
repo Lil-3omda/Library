@@ -30,18 +30,21 @@ export function Header() {
   };
 
   const handleQuickScan = (barcode: string) => {
-    const product = findProductByBarcode(barcode);
+    // Clean the barcode before searching
+    const cleanBarcode = barcode.trim();
+    const product = findProductByBarcode(cleanBarcode);
+    
     if (product) {
       showNotification(
         'success',
         'تم العثور على المنتج',
-        `${product.name}\nالكمية: ${product.quantity}\nالسعر: ${product.sellingPrice} د.ع`
+        `${product.name}\nالكمية: ${product.quantity}\nالسعر: ${product.sellingPrice.toLocaleString()} د.ع\nالباركود: ${product.barcode}`
       );
     } else {
       showNotification(
         'error',
         'لم يتم العثور على المنتج',
-        `لا يوجد منتج بالباركود: ${barcode}`
+        `لا يوجد منتج بالباركود: ${cleanBarcode}`
       );
     }
     setShowQuickScan(false);

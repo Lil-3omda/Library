@@ -22,30 +22,31 @@ export function BarcodeGenerator({
 
   // Generate a random barcode
   const generateRandomBarcode = () => {
+    if (!onGenerate) return;
+    
     let newBarcode = '';
     
     switch (format) {
       case 'EAN13':
         // Generate 13 digit EAN barcode
-        newBarcode = Array.from({ length: 13 }, () => Math.floor(Math.random() * 10)).join('');
+        newBarcode = '2' + Array.from({ length: 12 }, () => Math.floor(Math.random() * 10)).join('');
         break;
       case 'EAN8':
         // Generate 8 digit EAN barcode
-        newBarcode = Array.from({ length: 8 }, () => Math.floor(Math.random() * 10)).join('');
+        newBarcode = '2' + Array.from({ length: 7 }, () => Math.floor(Math.random() * 10)).join('');
         break;
       case 'UPC':
         // Generate 12 digit UPC barcode
-        newBarcode = Array.from({ length: 12 }, () => Math.floor(Math.random() * 10)).join('');
+        newBarcode = '0' + Array.from({ length: 11 }, () => Math.floor(Math.random() * 10)).join('');
         break;
       default:
         // Generate alphanumeric CODE128 barcode
-        const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        newBarcode = Array.from({ length: 10 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+        const timestamp = Date.now().toString();
+        const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+        newBarcode = `${timestamp.slice(-8)}${random}`;
     }
     
-    if (onGenerate) {
-      onGenerate(newBarcode);
-    }
+    onGenerate(newBarcode);
   };
 
   // Simple barcode renderer (basic implementation)

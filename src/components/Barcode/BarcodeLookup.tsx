@@ -25,7 +25,8 @@ export function BarcodeLookup({
   const searchProductByBarcode = (barcode: string) => {
     if (!barcode.trim()) return;
 
-    const product = products.find(p => p.barcode === barcode.trim());
+    // Exact match for barcode
+    const product = products.find(p => p.barcode && p.barcode.trim() === barcode.trim());
     setLastSearchedBarcode(barcode);
     
     if (product) {
@@ -44,13 +45,16 @@ export function BarcodeLookup({
   };
 
   const handleBarcodeDetected = (barcode: string) => {
+    // Clean the barcode and search
+    const cleanBarcode = barcode.trim();
     setSearchBarcode(barcode);
-    searchProductByBarcode(barcode);
+    searchProductByBarcode(cleanBarcode);
     setShowScanner(false);
   };
 
   const handleManualSearch = () => {
-    searchProductByBarcode(searchBarcode);
+    const cleanBarcode = searchBarcode.trim();
+    searchProductByBarcode(cleanBarcode);
   };
 
   const clearSearch = () => {

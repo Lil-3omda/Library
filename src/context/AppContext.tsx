@@ -107,7 +107,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const findProductByBarcode = (barcode: string) => {
-    return products.find(product => product.barcode === barcode);
+    if (!barcode || !barcode.trim()) return undefined;
+    return products.find(product => product.barcode && product.barcode.trim() === barcode.trim());
   };
 
   const exportToJSON = () => {

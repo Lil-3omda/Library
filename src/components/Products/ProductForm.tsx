@@ -11,7 +11,7 @@ interface ProductFormProps {
 }
 
 export function ProductForm({ product, onClose }: ProductFormProps) {
-  const { addProduct, updateProduct, categories } = useApp();
+  const { addProduct, updateProduct, categories, products } = useApp();
   const isEditing = !!product;
 
   const [formData, setFormData] = useState({
@@ -26,8 +26,34 @@ export function ProductForm({ product, onClose }: ProductFormProps) {
     description: product?.description || '',
   });
 
+  const [barcodeError, setBarcodeError] = useState<string>('');
+
+  // Validate barcode uniqueness
+  const validateBarcode = (barcode: string) => {
+    if (!barcode.trim()) {
+      setBarcodeError('');
+      return true;
+    }
+
+    const existingProduct = products.find(p => 
+      p.barcode === barcode.trim() && p.id !== product?.id
+    );
+
+    if (existingProduct) {
+      setBarcodeError(`الباركود مستخدم بالفعل في المنتج: ${existingProduct.name}`);
+      return false;
+    }
+
+    setBarcodeError('');
+    return true;
+  };
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate barcode before submission
+    if (!validateBarcode(formData.barcode)) {
+      return;
+    }
     
     if (isEditing) {
       updateProduct(product.id, formData);
@@ -44,8 +70,24 @@ export function ProductForm({ product, onClose }: ProductFormProps) {
       ...prev,
       [name]: type === 'number' ? parseFloat(value) || 0 : value
     }));
+
+    // Validate barcode on change
+    if (name === 'barcode') {
+      validateBarcode(value);
+    }
   };
 
+  const handleBarcodeChange = (barcode: string) => {
+    setFormData(prev => ({ ...prev, barcode }));
+    validateBarcode(barcode);
+  };
+
+  const handleBarcodeScanned = (barcode: string) => {
+    // When scanning, we want to use the scanned barcode as-is
+    // Don't generate a new one
+    setFormData(prev => ({ ...prev, barcode }));
+    validateBarcode(barcode);
+  };
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -177,9 +219,14 @@ export function ProductForm({ product, onClose }: ProductFormProps) {
               </label>
               <BarcodeInput
                 value={formData.barcode}
-                onChange={(value) => setFormData(prev => ({ ...prev, barcode: value }))}
+                onChange={handleBarcodeChange}
+                onScan={handleBarcodeScanned}
                 placeholder="رقم الباركود"
+                allowGeneration={!isEditing} // Only allow generation for new products
               />
+              {barcodeError && (
+                <p className="text-red-600 text-sm mt-1">{barcodeError}</p>
+              )}
             </div>
           </div>
 
