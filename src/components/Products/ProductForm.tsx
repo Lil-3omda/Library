@@ -11,7 +11,7 @@ interface ProductFormProps {
 }
 
 export function ProductForm({ product, onClose }: ProductFormProps) {
-  const { addProduct, updateProduct, categories, products } = useApp();
+  const { addProduct, updateProduct, categories, products, findProductByBarcode } = useApp();
   const isEditing = !!product;
 
   const [formData, setFormData] = useState({
@@ -27,6 +27,8 @@ export function ProductForm({ product, onClose }: ProductFormProps) {
   });
 
   const [barcodeError, setBarcodeError] = useState<string>('');
+  const [showExistingProductDialog, setShowExistingProductDialog] = useState(false);
+  const [existingProduct, setExistingProduct] = useState<Product | null>(null);
 
   // Validate barcode uniqueness
   const validateBarcode = (barcode: string) => {
@@ -82,12 +84,48 @@ export function ProductForm({ product, onClose }: ProductFormProps) {
     validateBarcode(barcode);
   };
 
-  const handleBarcodeScanned = (barcode: string) => {
-    // When scanning, we want to use the scanned barcode as-is
-    // Don't generate a new one
-    setFormData(prev => ({ ...prev, barcode }));
-    validateBarcode(barcode);
+  const handleBarcodeExists = (existingProd: Product) => {
+    if (!isEditing) {
+      setExistingProduct(existingProd);
+      setShowExistingProductDialog(true);
+    }
   };
+
+  const loadExistingProduct = () => {
+    if (existingProduct) {
+      setFormData({
+        name: existingProduct.name,
+        category: existingProduct.category,
+        quantity: existingProduct.quantity,
+        minQuantity: existingProduct.minQuantity,
+        costPrice: existingProduct.costPrice,
+        sellingPrice: existingProduct.sellingPrice,
+        supplier: existingProduct.supplier,
+        barcode: existingProduct.barcode || '',
+        description: existingProduct.description || '',
+      });
+      setBarcodeError('');
+      setShowExistingProductDialog(false);
+      setExistingProduct(null);
+    }
+  };
+
+  const continueWithNewProduct = () => {
+    setShowExistingProductDialog(false);
+    setExistingProduct(null);
+  };
+
+  const handleBarcodeScanned = (barcode: string) => {
+    // Check if product exists first
+    const existing = findProductByBarcode(barcode);
+    if (existing && !isEditing) {
+      handleBarcodeExists(existing);
+    } else {
+      setFormData(prev => ({ ...prev, barcode }));
+      validateBarcode(barcode);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -223,6 +261,8 @@ export function ProductForm({ product, onClose }: ProductFormProps) {
                 onScan={handleBarcodeScanned}
                 placeholder="رقم الباركود"
                 allowGeneration={!isEditing} // Only allow generation for new products
+                onBarcodeExists={handleBarcodeExists}
+                checkExistingBarcode={findProductByBarcode}
               />
               {barcodeError && (
                 <p className="text-red-600 text-sm mt-1">{barcodeError}</p>
@@ -272,6 +312,38 @@ export function ProductForm({ product, onClose }: ProductFormProps) {
           </div>
         </form>
       </div>
+
+      {/* Existing Product Dialog */}
+      {showExistingProductDialog && existingProduct && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-60">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">منتج موجود بالفعل</h3>
+            <div className="mb-4">
+              <p className="text-gray-700 mb-2">تم العثور على منتج بهذا الباركود:</p>
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <p className="font-medium">{existingProduct.name}</p>
+                <p className="text-sm text-gray-600">التصنيف: {existingProduct.category}</p>
+                <p className="text-sm text-gray-600">الكمية: {existingProduct.quantity}</p>
+                <p className="text-sm text-gray-600">الباركود: {existingProduct.barcode}</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={loadExistingProduct}
+                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700"
+              >
+                تحميل بيانات المنتج
+              </button>
+              <button
+                onClick={continueWithNewProduct}
+                className="flex-1 border border-gray-300 py-2 px-4 rounded-md hover:bg-gray-50"
+              >
+                إنشاء منتج جديد
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

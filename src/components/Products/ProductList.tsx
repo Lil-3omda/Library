@@ -37,9 +37,15 @@ export function ProductList() {
   };
 
   const handleProductFound = (product: Product) => {
-    // When product is found via barcode, open it for editing
-    setEditingProduct(product);
-    setShowForm(true);
+    // Scroll to the product in the list and highlight it
+    const productElement = document.getElementById(`product-${product.id}`);
+    if (productElement) {
+      productElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      productElement.classList.add('bg-blue-50', 'border-blue-200');
+      setTimeout(() => {
+        productElement.classList.remove('bg-blue-50', 'border-blue-200');
+      }, 3000);
+    }
   };
 
   const handleProductNotFound = (barcode: string) => {
@@ -139,7 +145,7 @@ export function ProductList() {
                   const profitMargin = product.costPrice > 0 ? ((profit / product.costPrice) * 100).toFixed(1) : '0';
                   
                   return (
-                    <tr key={product.id} className="hover:bg-gray-50">
+                    <tr key={product.id} id={`product-${product.id}`} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
                           <div className="text-sm font-medium text-gray-900">{product.name}</div>

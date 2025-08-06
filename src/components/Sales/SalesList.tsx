@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import { Calendar, DollarSign, Plus } from 'lucide-react';
+import { Calendar, DollarSign, Plus, Printer } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { SaleForm } from './SaleForm';
+import { PrintOrder } from './PrintOrder';
 
 export function SalesList() {
-  const { sales } = useApp();
+  const { sales, products } = useApp();
   const [showForm, setShowForm] = useState(false);
   const [selectedDate, setSelectedDate] = useState('');
+  const [showPrintDialog, setShowPrintDialog] = useState(false);
+  const [selectedSaleForPrint, setSelectedSaleForPrint] = useState<any>(null);
 
   const filteredSales = selectedDate 
     ? sales.filter(sale => sale.date.startsWith(selectedDate))
@@ -14,6 +17,27 @@ export function SalesList() {
 
   const totalSales = filteredSales.reduce((sum, sale) => sum + sale.totalPrice, 0);
   const totalQuantity = filteredSales.reduce((sum, sale) => sum + sale.quantity, 0);
+
+  const handlePrintSale = (sale: any) => {
+    const product = products.find(p => p.id === sale.productId);
+    const orderData = {
+      id: sale.id,
+      items: [{
+        name: sale.productName,
+        barcode: product?.barcode,
+        quantity: sale.quantity,
+        unitPrice: sale.unitPrice,
+        totalPrice: sale.totalPrice
+      }],
+      totalAmount: sale.totalPrice,
+      totalItems: sale.quantity,
+      date: sale.date,
+      type: 'sale' as const
+    };
+    
+    setSelectedSaleForPrint(orderData);
+    setShowPrintDialog(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -96,6 +120,9 @@ export function SalesList() {
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     المجموع
                   </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    الإجراءات
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -116,6 +143,16 @@ export function SalesList() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {sale.totalPrice.toLocaleString()} د.ع
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button
+                        onClick={() => handlePrintSale(sale)}
+                        className="text-blue-600 hover:text-blue-900 flex items-center gap-1"
+                        title="طباعة الفاتورة"
+                      >
+                        <Printer className="w-4 h-4" />
+                        طباعة
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -126,6 +163,18 @@ export function SalesList() {
 
       {showForm && (
         <SaleForm onClose={() => setShowForm(false)} />
+      )}
+      
+      {/* Print Dialog */}
+      {showPrintDialog && selectedSaleForPrint && (
+        <PrintOrder
+          orderData={selectedSaleForPrint}
+          isOpen={showPrintDialog}
+          onClose={() => {
+            setShowPrintDialog(false);
+            setSelectedSaleForPrint(null);
+          }}
+        />
       )}
     </div>
   );

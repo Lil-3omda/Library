@@ -11,6 +11,8 @@ interface BarcodeInputProps {
   showGenerator?: boolean;
   onScan?: (barcode: string) => void;
   allowGeneration?: boolean;
+  onBarcodeExists?: (product: any) => void;
+  checkExistingBarcode?: (barcode: string) => any;
 }
 
 export function BarcodeInput({
@@ -21,16 +23,39 @@ export function BarcodeInput({
   showScanner = true,
   showGenerator = true,
   onScan,
-  allowGeneration = true
+  allowGeneration = true,
+  onBarcodeExists,
+  checkExistingBarcode
 }: BarcodeInputProps) {
   const [showScannerModal, setShowScannerModal] = useState(false);
 
   const handleBarcodeDetected = (barcode: string) => {
+    // Check if barcode exists before setting value
+    if (checkExistingBarcode) {
+      const existingProduct = checkExistingBarcode(barcode);
+      if (existingProduct && onBarcodeExists) {
+        onBarcodeExists(existingProduct);
+        setShowScannerModal(false);
+        return;
+      }
+    }
+    
     onChange(barcode);
     if (onScan) {
       onScan(barcode);
     }
     setShowScannerModal(false);
+  };
+
+  const handleManualInput = (inputValue: string) => {
+    if (checkExistingBarcode && inputValue.trim()) {
+      const existingProduct = checkExistingBarcode(inputValue.trim());
+      if (existingProduct && onBarcodeExists) {
+        onBarcodeExists(existingProduct);
+        return;
+      }
+    }
+    onChange(inputValue);
   };
 
   const generateBarcode = () => {
@@ -49,10 +74,19 @@ export function BarcodeInput({
         <input
           type="text"
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => handleManualInput(e.target.value)}
           placeholder={placeholder}
           disabled={disabled}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 pr-20"
+          onBlur={(e) => {
+            const inputValue = e.target.value.trim();
+            if (inputValue && checkExistingBarcode) {
+              const existingProduct = checkExistingBarcode(inputValue);
+              if (existingProduct && onBarcodeExists) {
+                onBarcodeExists(existingProduct);
+              }
+            }
+          }}
         />
         
         <div className="absolute left-2 top-1/2 transform -translate-y-1/2 flex gap-1">

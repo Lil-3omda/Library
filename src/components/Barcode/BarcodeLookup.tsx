@@ -25,8 +25,11 @@ export function BarcodeLookup({
   const searchProductByBarcode = (barcode: string) => {
     if (!barcode.trim()) return;
 
-    // Exact match for barcode
-    const product = products.find(p => p.barcode && p.barcode.trim() === barcode.trim());
+    // Improved search - exact match for barcode with better cleaning
+    const cleanBarcode = barcode.trim().toLowerCase();
+    const product = products.find(p => 
+      p.barcode && p.barcode.trim().toLowerCase() === cleanBarcode
+    );
     setLastSearchedBarcode(barcode);
     
     if (product) {
@@ -45,15 +48,21 @@ export function BarcodeLookup({
   };
 
   const handleBarcodeDetected = (barcode: string) => {
-    // Clean the barcode and search
-    const cleanBarcode = barcode.trim();
+    // Enhanced barcode cleaning and validation
+    const cleanBarcode = barcode.trim().replace(/[^\w\d-]/g, '');
+    if (!cleanBarcode) {
+      setShowNotFound(true);
+      setLastSearchedBarcode(barcode);
+      return;
+    }
+    
     setSearchBarcode(barcode);
     searchProductByBarcode(cleanBarcode);
     setShowScanner(false);
   };
 
   const handleManualSearch = () => {
-    const cleanBarcode = searchBarcode.trim();
+    const cleanBarcode = searchBarcode.trim().replace(/[^\w\d-]/g, '');
     searchProductByBarcode(cleanBarcode);
   };
 

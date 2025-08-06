@@ -108,7 +108,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const findProductByBarcode = (barcode: string) => {
     if (!barcode || !barcode.trim()) return undefined;
-    return products.find(product => product.barcode && product.barcode.trim() === barcode.trim());
+    
+    // Enhanced barcode matching with better cleaning
+    const cleanSearchBarcode = barcode.trim().toLowerCase().replace(/[^\w\d-]/g, '');
+    if (!cleanSearchBarcode) return undefined;
+    
+    return products.find(product => {
+      if (!product.barcode) return false;
+      const cleanProductBarcode = product.barcode.trim().toLowerCase().replace(/[^\w\d-]/g, '');
+      return cleanProductBarcode === cleanSearchBarcode;
+    });
   };
 
   const exportToJSON = () => {

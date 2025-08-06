@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Minus, Plus, ShoppingCart, Search } from 'lucide-react';
+import { Minus, Plus, ShoppingCart, Search, Printer } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { BarcodeLookup } from '../Barcode/BarcodeLookup';
+import { PrintOrder } from './PrintOrder';
 import { Product } from '../../types';
 
 export function QuickSale() {
@@ -9,6 +10,8 @@ export function QuickSale() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [cart, setCart] = useState<{[key: string]: number}>({});
+  const [showPrintDialog, setShowPrintDialog] = useState(false);
+  const [lastOrder, setLastOrder] = useState<any>(null);
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -71,8 +74,30 @@ export function QuickSale() {
     
     if (salesData.length > 0) {
       addBulkSales(salesData);
+      
+      // Prepare order data for printing
+      const orderData = {
+        id: Date.now().toString(),
+        items: salesData.map(sale => ({
+          name: sale.productName,
+          barcode: products.find(p => p.id === sale.productId)?.barcode,
+          quantity: sale.quantity,
+          unitPrice: sale.unitPrice,
+          totalPrice: sale.totalPrice
+        })),
+        totalAmount: getTotalAmount(),
+        totalItems: getTotalItems(),
+        date: new Date().toISOString(),
+        type: 'sale' as const
+      };
+      
+      setLastOrder(orderData);
       setCart({});
-      alert('تم تسجيل المبيعة بنجاح!');
+      
+      // Show success message with print option
+      if (window.confirm('تم تسجيل المبيعة بنجاح! هل تريد طباعة الفاتورة؟')) {
+        setShowPrintDialog(true);
+      }
     }
   };
 
@@ -236,11 +261,30 @@ export function QuickSale() {
                   <ShoppingCart className="w-5 h-5" />
                   إتمام المبيعة
                 </button>
+                
+                {lastOrder && (
+                  <button
+                    onClick={() => setShowPrintDialog(true)}
+                    className="w-full mt-2 bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Printer className="w-4 h-4" />
+                    طباعة آخر فاتورة
+                  </button>
+                )}
               </>
             )}
           </div>
         </div>
       </div>
+      
+      {/* Print Dialog */}
+      {showPrintDialog && lastOrder && (
+        <PrintOrder
+          orderData={lastOrder}
+          isOpen={showPrintDialog}
+          onClose={() => setShowPrintDialog(false)}
+        />
+      )}
     </div>
   );
 }
