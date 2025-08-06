@@ -134,6 +134,16 @@ export function PrintOrder({ orderData, isOpen, onClose }: PrintOrderProps) {
             </div>
           </div>
 
+          {/* Test Information - Only show for test orders */}
+          {orderData.id.startsWith('TEST-') && (
+            <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg print:bg-transparent print:border-gray-300">
+              <h4 className="font-medium text-yellow-800 mb-2">🧪 هذا طلب تجريبي</h4>
+              <p className="text-sm text-yellow-700">
+                تم إنشاء هذا الطلب لاختبار وظيفة الطباعة. البيانات المعروضة هي بيانات تجريبية وليست حقيقية.
+              </p>
+            </div>
+          )}
+
           {/* Order QR Code Placeholder */}
           <div className="text-center mb-8 print:mb-4">
             <div className="inline-block border-2 border-dashed border-gray-300 p-4 rounded-lg">

@@ -13,6 +13,7 @@ interface BarcodeInputProps {
   allowGeneration?: boolean;
   onBarcodeExists?: (product: any) => void;
   checkExistingBarcode?: (barcode: string) => any;
+  readOnlyMode?: boolean; // New prop for testing mode
 }
 
 export function BarcodeInput({
@@ -25,11 +26,22 @@ export function BarcodeInput({
   onScan,
   allowGeneration = true,
   onBarcodeExists,
-  checkExistingBarcode
+  checkExistingBarcode,
+  readOnlyMode = false
 }: BarcodeInputProps) {
   const [showScannerModal, setShowScannerModal] = useState(false);
 
   const handleBarcodeDetected = (barcode: string) => {
+    // In read-only mode, just display the scanned barcode
+    if (readOnlyMode) {
+      onChange(barcode);
+      if (onScan) {
+        onScan(barcode);
+      }
+      setShowScannerModal(false);
+      return;
+    }
+    
     // Check if barcode exists before setting value
     if (checkExistingBarcode) {
       const existingProduct = checkExistingBarcode(barcode);
@@ -48,6 +60,11 @@ export function BarcodeInput({
   };
 
   const handleManualInput = (inputValue: string) => {
+    if (readOnlyMode) {
+      onChange(inputValue);
+      return;
+    }
+    
     if (checkExistingBarcode && inputValue.trim()) {
       const existingProduct = checkExistingBarcode(inputValue.trim());
       if (existingProduct && onBarcodeExists) {
@@ -59,7 +76,7 @@ export function BarcodeInput({
   };
 
   const generateBarcode = () => {
-    if (!allowGeneration) return;
+    if (!allowGeneration || readOnlyMode) return;
     
     // Generate a simple random barcode
     const timestamp = Date.now().toString();
@@ -106,7 +123,7 @@ export function BarcodeInput({
             <button
               type="button"
               onClick={generateBarcode}
-              disabled={disabled}
+              disabled={disabled || readOnlyMode}
               className="p-1 text-green-600 hover:text-green-800 disabled:opacity-50 disabled:cursor-not-allowed"
               title="توليد باركود"
             >

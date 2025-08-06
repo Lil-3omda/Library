@@ -1,5 +1,5 @@
 import React from 'react';
-import { Package, ShoppingCart, BarChart3, Settings, Plus, AlertTriangle } from 'lucide-react';
+import { Package, ShoppingCart, BarChart3, Settings, Plus, AlertTriangle, TestTube } from 'lucide-react';
 
 interface SidebarProps {
   activeTab: string;
@@ -14,6 +14,7 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
     { id: 'quick-sale', label: 'نقطة البيع', icon: ShoppingCart },
     { id: 'sales', label: 'المبيعات', icon: ShoppingCart },
     { id: 'low-stock', label: 'نفاد المخزون', icon: AlertTriangle },
+    { id: 'barcode-test', label: 'اختبار الباركود', icon: TestTube },
     { id: 'settings', label: 'الإعدادات', icon: Settings },
   ];
 

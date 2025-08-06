@@ -9,6 +9,7 @@ import { SalesList } from './components/Sales/SalesList';
 import { QuickSale } from './components/Sales/QuickSale';
 import { LowStockAlert } from './components/LowStock/LowStockAlert';
 import { DataManagement } from './components/Settings/DataManagement';
+import { BarcodeTestPage } from './components/TestBarcode/BarcodeTestPage';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -32,6 +33,8 @@ function App() {
         return <LowStockAlert />;
       case 'settings':
         return <DataManagement />;
+      case 'barcode-test':
+        return <BarcodeTestPage />;
       default:
         return <Dashboard />;
     }
