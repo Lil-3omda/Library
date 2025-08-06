@@ -29,6 +29,7 @@ export function BarcodeScanner({
   const [selectedDevice, setSelectedDevice] = useState<string>('');
   const [isInitializing, setIsInitializing] = useState(false);
   const zxingReaderRef = useRef<BrowserMultiFormatReader | null>(null);
+  const [isQuaggaStarted, setIsQuaggaStarted] = useState(false);
 
   const stopAllStreams = useCallback(() => {
     if (stream) {
@@ -38,8 +39,9 @@ export function BarcodeScanner({
     
     if (currentLibrary === 'quagga') {
       try {
-        if (Quagga && typeof Quagga.stop === 'function') {
+        if (Quagga && typeof Quagga.stop === 'function' && isQuaggaStarted) {
           Quagga.stop();
+          setIsQuaggaStarted(false);
         }
       } catch (err) {
         console.error('Error stopping Quagga:', err);
@@ -51,7 +53,7 @@ export function BarcodeScanner({
         console.error('Error stopping ZXing:', err);
       }
     }
-  }, [stream, currentLibrary]);
+  }, [stream, currentLibrary, isQuaggaStarted]);
 
   const getAvailableCameras = async () => {
     try {
@@ -152,6 +154,7 @@ export function BarcodeScanner({
 
       await Quagga.init(config);
       Quagga.start();
+      setIsQuaggaStarted(true);
 
       Quagga.onDetected((result) => {
         const code = result.codeResult.code;
@@ -176,6 +179,7 @@ export function BarcodeScanner({
       return true;
     } catch (err) {
       console.error('Quagga initialization error:', err);
+      setIsQuaggaStarted(false);
       return false;
     }
   };
