@@ -1,18 +1,10 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import basicSsl from '@vitejs/plugin-basic-ssl'
 
-// https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [react()],
-  optimizeDeps: {
-    exclude: ['lucide-react'],
-  },
+export default {
+  plugins: [basicSsl()],
   server: {
-    https: true, // Enable HTTPS for camera access
-    host: true,  // Allow access from local network
-  },
-  preview: {
-    https: true,
-    host: true,
+    https: true,        // Enable HTTPS
+    host: '0.0.0.0',    // Allow connections from your local network
+    port: 3000          // Keep your desired port
   }
-});
+}

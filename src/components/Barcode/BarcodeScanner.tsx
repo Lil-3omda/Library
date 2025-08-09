@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import Quagga from 'quagga';
 import { BrowserMultiFormatReader } from '@zxing/browser';
+import { NotFoundException } from '@zxing/library';
 import { Camera, X, ScanLine, Settings, RefreshCcw, AlertCircle } from 'lucide-react';
 
 interface BarcodeScannerProps {
@@ -22,11 +23,11 @@ export function BarcodeScanner({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [detectedBarcode, setDetectedBarcode] = useState<string>('');
+  const [detectedBarcode, setDetectedBarcode] = useState('');
   const [currentLibrary, setCurrentLibrary] = useState<ScannerLibrary>('quagga');
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
-  const [selectedDevice, setSelectedDevice] = useState<string>('');
+  const [selectedDevice, setSelectedDevice] = useState('');
   const [isInitializing, setIsInitializing] = useState(false);
   const zxingReaderRef = useRef<BrowserMultiFormatReader | null>(null);
   const [isQuaggaStarted, setIsQuaggaStarted] = useState(false);
@@ -37,21 +38,16 @@ export function BarcodeScanner({
       setStream(null);
     }
     
-    if (currentLibrary === 'quagga') {
+    if (currentLibrary === 'quagga' && isQuaggaStarted) {
       try {
-        if (Quagga && typeof Quagga.stop === 'function' && isQuaggaStarted) {
-          Quagga.stop();
-          setIsQuaggaStarted(false);
-        }
+        Quagga.stop();
+        setIsQuaggaStarted(false);
       } catch (err) {
         console.error('Error stopping Quagga:', err);
       }
     } else if (currentLibrary === 'zxing' && zxingReaderRef.current) {
-      try {
-        zxingReaderRef.current.reset();
-      } catch (err) {
-        console.error('Error stopping ZXing:', err);
-      }
+      zxingReaderRef.current.stopContinuousDecode();
+      zxingReaderRef.current = null;
     }
   }, [stream, currentLibrary, isQuaggaStarted]);
 
@@ -62,7 +58,6 @@ export function BarcodeScanner({
       const videoDevices = devices.filter(device => device.kind === 'videoinput');
       setDevices(videoDevices);
       
-      // Select back camera by default
       const backCamera = videoDevices.find(device => 
         device.label.toLowerCase().includes('back') || 
         device.label.toLowerCase().includes('environment')
@@ -74,22 +69,16 @@ export function BarcodeScanner({
     }
   };
 
-  const requestCameraPermission = async (): Promise<boolean> => {
+  const requestCameraPermission = async () => {
     try {
       const constraints = {
         video: {
           facingMode: 'environment',
           width: { ideal: 1280 },
-          height: { ideal: 720 }
+          height: { ideal: 720 },
+          ...(selectedDevice && { deviceId: { exact: selectedDevice } })
         }
       };
-
-      if (selectedDevice) {
-        constraints.video = {
-          ...constraints.video,
-          deviceId: { exact: selectedDevice }
-        };
-      }
 
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       setStream(stream);
@@ -97,24 +86,30 @@ export function BarcodeScanner({
     } catch (err: any) {
       console.error('Camera permission error:', err);
       
-      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        setError('تم رفض إذن الكاميرا. يرجى السماح بالوصول إلى الكاميرا في إعدادات المتصفح.');
-      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-        setError('لم يتم العثور على كاميرا. تأكد من وجود كاميرا متصلة بالجهاز.');
+      let errorMessage = 'خطأ في الوصول إلى الكاميرا';
+      if (err.name === 'NotAllowedError') {
+        errorMessage = 'تم رفض إذن الكاميرا. يرجى السماح بالوصول إلى الكاميرا';
+      } else if (err.name === 'NotFoundError') {
+        errorMessage = 'لم يتم العثور على كاميرا متصلة';
       } else if (err.name === 'NotSupportedError') {
-        setError('متصفحك لا يدعم الوصول إلى الكاميرا. يرجى استخدام متصفح حديث.');
-      } else if (err.name === 'NotSecureError' || location.protocol !== 'https:') {
-        setError('يجب استخدام اتصال آمن (HTTPS) للوصول إلى الكاميرا.');
-      } else {
-        setError('خطأ في الوصول إلى الكاميرا: ' + (err.message || 'خطأ غير معروف'));
+        errorMessage = 'المتصفح لا يدعم الوصول إلى الكاميرا';
+      } else if (location.protocol !== 'https:') {
+        errorMessage = 'يجب استخدام اتصال آمن (HTTPS) للوصول إلى الكاميرا';
       }
+      
+      setError(errorMessage);
       return false;
     }
   };
 
-  const startQuaggaScanner = async (): Promise<boolean> => {
+  const startQuaggaScanner = async () => {
     try {
       if (!scannerRef.current) return false;
+
+      if (isQuaggaStarted) {
+        Quagga.stop();
+        setIsQuaggaStarted(false);
+      }
 
       const config = {
         inputStream: {
@@ -124,7 +119,8 @@ export function BarcodeScanner({
           constraints: {
             width: { min: 640, ideal: 1280 },
             height: { min: 480, ideal: 720 },
-            facingMode: "environment"
+            facingMode: "environment",
+            ...(selectedDevice && { deviceId: selectedDevice })
           }
         },
         locator: {
@@ -133,60 +129,44 @@ export function BarcodeScanner({
         },
         numOfWorkers: navigator.hardwareConcurrency || 2,
         decoder: {
-          readers: [
-            "code_128_reader",
-            "ean_reader",
-            "ean_8_reader",
-            "code_39_reader",
-            "code_39_vin_reader",
-            "codabar_reader",
-            "upc_reader",
-            "upc_e_reader",
-            "i2of5_reader"
-          ]
+          readers: ["code_128_reader", "ean_reader", "ean_8_reader"]
         },
         locate: true
       };
 
-      if (selectedDevice) {
-        config.inputStream.constraints.deviceId = selectedDevice;
-      }
+      await new Promise<void>((resolve, reject) => {
+        Quagga.init(config, (err) => {
+          if (err) return reject(err);
+          resolve();
+        });
+      });
 
-      await Quagga.init(config);
       Quagga.start();
       setIsQuaggaStarted(true);
 
       Quagga.onDetected((result) => {
-        const code = result.codeResult.code;
-        // Clean and validate the detected code
-        const cleanCode = code ? code.trim() : '';
-        if (cleanCode && cleanCode !== detectedBarcode && cleanCode.length >= 3) {
-          setDetectedBarcode(cleanCode);
-          onBarcodeDetected(cleanCode);
-          
-          // Vibrate if supported
-          if (navigator.vibrate) {
-            navigator.vibrate([200, 100, 200]);
-          }
-          
-          // Auto close after successful scan
-          setTimeout(() => {
-            onClose();
-          }, 1500);
+        const code = result.codeResult?.code?.trim();
+        if (code && code.length >= 3 && code !== detectedBarcode) {
+          handleSuccessfulScan(code);
         }
       });
 
       return true;
     } catch (err) {
       console.error('Quagga initialization error:', err);
-      setIsQuaggaStarted(false);
       return false;
     }
   };
 
-  const startZXingScanner = async (): Promise<boolean> => {
+  const startZXingScanner = async () => {
     try {
       if (!videoRef.current) return false;
+
+      // Clear previous instance
+      if (zxingReaderRef.current) {
+        zxingReaderRef.current.stopContinuousDecode();
+        zxingReaderRef.current = null;
+      }
 
       const reader = new BrowserMultiFormatReader();
       zxingReaderRef.current = reader;
@@ -194,44 +174,54 @@ export function BarcodeScanner({
       const constraints = {
         video: {
           facingMode: 'environment',
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
+          ...(selectedDevice && { deviceId: { exact: selectedDevice } })
         }
       };
 
-      if (selectedDevice) {
-        constraints.video.deviceId = { exact: selectedDevice };
+      // Get video stream
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      setStream(stream);
+
+      // Attach stream to video element
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.setAttribute('playsinline', 'true');
+        await videoRef.current.play().catch(err => {
+          console.error('Error playing video:', err);
+          throw err;
+        });
       }
 
-      await reader.decodeFromConstraints(constraints, videoRef.current, (result, error) => {
-        if (result) {
-          const code = result.getText();
-          // Clean and validate the detected code
-          const cleanCode = code ? code.trim() : '';
-          if (cleanCode && cleanCode !== detectedBarcode && cleanCode.length >= 3) {
-            setDetectedBarcode(cleanCode);
-            onBarcodeDetected(cleanCode);
-            
-            if (navigator.vibrate) {
-              navigator.vibrate([200, 100, 200]);
+      // Start decoding
+      reader.decodeFromConstraints(
+        constraints,
+        videoRef.current,
+        (result, err) => {
+          if (result) {
+            const code = result.getText().trim();
+            if (code && code !== detectedBarcode) {
+              handleSuccessfulScan(code);
             }
-            
-            setTimeout(() => {
-              onClose();
-            }, 1500);
+          }
+          if (err && !(err instanceof NotFoundException)) {
+            console.error('ZXing error:', err);
           }
         }
-        
-        if (error && error.name !== 'NotFoundException') {
-          console.error('ZXing scanning error:', error);
-        }
-      });
+      );
 
       return true;
     } catch (err) {
       console.error('ZXing initialization error:', err);
       return false;
     }
+  };
+
+  const handleSuccessfulScan = (barcode: string) => {
+    setDetectedBarcode(barcode);
+    onBarcodeDetected(barcode);
+    
+    if (navigator.vibrate) navigator.vibrate(200);
+    setTimeout(onClose, 500);
   };
 
   const startScanner = async () => {
@@ -241,37 +231,27 @@ export function BarcodeScanner({
     setError(null);
     setDetectedBarcode('');
 
-    // Check camera permission first
-    const hasPermission = await requestCameraPermission();
-    if (!hasPermission) {
+    if (!await requestCameraPermission()) {
       setIsInitializing(false);
       return;
     }
 
     setIsScanning(true);
 
-    let success = false;
-    
-    // Try Quagga first
-    if (currentLibrary === 'quagga') {
-      success = await startQuaggaScanner();
-      if (!success) {
-        console.log('Quagga failed, trying ZXing...');
-        setCurrentLibrary('zxing');
-        success = await startZXingScanner();
-      }
-    } else {
-      // Try ZXing first
-      success = await startZXingScanner();
-      if (!success) {
-        console.log('ZXing failed, trying Quagga...');
-        setCurrentLibrary('quagga');
-        success = await startQuaggaScanner();
-      }
+    let success = await (currentLibrary === 'quagga' 
+      ? startQuaggaScanner() 
+      : startZXingScanner());
+
+    if (!success) {
+      const fallbackLibrary = currentLibrary === 'quagga' ? 'zxing' : 'quagga';
+      setCurrentLibrary(fallbackLibrary);
+      success = await (fallbackLibrary === 'quagga' 
+        ? startQuaggaScanner() 
+        : startZXingScanner());
     }
 
     if (!success) {
-      setError('فشل في تشغيل ماسح الباركود. تأكد من إعطاء الإذن للوصول إلى الكاميرا والاتصال بشبكة آمنة (HTTPS).');
+      setError('فشل في تشغيل الماسح. تأكد من الإذن والاتصال الآمن (HTTPS).');
       setIsScanning(false);
     }
 
@@ -295,10 +275,8 @@ export function BarcodeScanner({
       setDetectedBarcode('');
     }
 
-    return () => {
-      stopAllStreams();
-    };
-  }, [isOpen, stopAllStreams]);
+    return stopAllStreams;
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen && !isScanning && !error && !isInitializing) {
@@ -306,14 +284,11 @@ export function BarcodeScanner({
     }
   }, [selectedDevice]);
 
-
-
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-3xl mx-4 max-h-[90vh] overflow-y-auto">
-        {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
             <Camera className="w-6 h-6" />
@@ -328,16 +303,12 @@ export function BarcodeScanner({
               <Settings className="w-3 h-3" />
               {currentLibrary === 'quagga' ? 'Quagga' : 'ZXing'}
             </button>
-            <button 
-              onClick={onClose}
-              className="text-gray-500 hover:text-gray-700"
-            >
+            <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
               <X className="w-6 h-6" />
             </button>
           </div>
         </div>
 
-        {/* Camera Selection */}
         {devices.length > 1 && (
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -357,42 +328,27 @@ export function BarcodeScanner({
           </div>
         )}
 
-        {/* Scanner Area */}
         <div className="relative">
           {error ? (
             <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
               <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
               <p className="text-red-600 mb-4 font-medium">{error}</p>
-              <div className="space-y-2">
-                <button
-                  onClick={startScanner}
-                  className="bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700 flex items-center gap-2 mx-auto"
-                >
-                  <RefreshCcw className="w-4 h-4" />
-                  إعادة المحاولة
-                </button>
-                <div className="text-sm text-gray-600">
-                  <p>نصائح لحل المشكلة:</p>
-                  <ul className="list-disc list-inside mt-2 space-y-1">
-                    <li>تأكد من السماح بالوصول إلى الكاميرا في المتصفح</li>
-                    <li>استخدم اتصال آمن (HTTPS)</li>
-                    <li>أعد تحميل الصفحة وحاول مرة أخرى</li>
-                    <li>تأكد من عدم استخدام الكاميرا من تطبيق آخر</li>
-                  </ul>
-                </div>
-              </div>
+              <button
+                onClick={startScanner}
+                className="bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700 flex items-center gap-2 mx-auto"
+              >
+                <RefreshCcw className="w-4 h-4" />
+                إعادة المحاولة
+              </button>
             </div>
           ) : (
             <div className="relative bg-gray-900 rounded-lg overflow-hidden">
               {currentLibrary === 'quagga' ? (
-                <div
-                  ref={scannerRef}
-                  className="w-full h-80 flex items-center justify-center"
-                >
+                <div ref={scannerRef} className="w-full h-80 flex items-center justify-center">
                   {!isScanning && (
                     <div className="text-white text-center">
                       <ScanLine className="w-12 h-12 mx-auto mb-4 animate-pulse" />
-                      <p>{isInitializing ? 'جاري تحضير الماسح...' : 'اضغط إعادة المحاولة لبدء المسح'}</p>
+                      <p>{isInitializing ? 'جاري تحضير الماسح...' : 'جاري تهيئة الماسح'}</p>
                     </div>
                   )}
                 </div>
@@ -406,43 +362,31 @@ export function BarcodeScanner({
                 />
               )}
               
-              {/* Scanning overlay */}
               {isScanning && (
                 <div className="absolute inset-0 pointer-events-none">
                   <div className="absolute inset-4 border-2 border-green-400 rounded-lg">
-                    <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-green-400"></div>
-                    <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-green-400"></div>
-                    <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-green-400"></div>
-                    <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-green-400"></div>
-                  </div>
-                  
-                  {/* Scanning line animation */}
-                  <div className="absolute top-1/2 left-8 right-8 h-1 bg-green-400 animate-pulse transform -translate-y-1/2"></div>
-                  
-                  {/* Library indicator */}
-                  <div className="absolute top-4 left-4 bg-green-600 text-white px-2 py-1 rounded text-xs">
-                    {currentLibrary === 'quagga' ? 'Quagga Scanner' : 'ZXing Scanner'}
+                    {[['top', 'left'], ['top', 'right'], ['bottom', 'left'], ['bottom', 'right']].map(([vert, horiz]) => (
+                      <div 
+                        key={`${vert}-${horiz}`}
+                        className={`absolute ${vert}-0 ${horiz}-0 w-8 h-8 border-${vert[0]}-4 border-${horiz[0]}-4 border-green-400`}
+                      />
+                    ))}
                   </div>
                 </div>
               )}
             </div>
           )}
 
-          {/* Instructions */}
           <div className="mt-4 text-center text-gray-600">
-            <p className="text-sm">
-              وجه الكاميرا نحو الباركود وتأكد من وضوح الصورة والإضاءة الجيدة
-            </p>
+            <p className="text-sm">وجه الكاميرا نحو الباركود مع توفر إضاءة جيدة</p>
             {detectedBarcode && (
               <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-                <p className="text-green-800 font-medium">✅ تم اكتشاف: {detectedBarcode}</p>
-                <p className="text-green-600 text-sm">سيتم إغلاق النافذة تلقائياً...</p>
+                <p className="text-green-800 font-medium">تم المسح: {detectedBarcode}</p>
               </div>
             )}
           </div>
         </div>
 
-        {/* Footer */}
         <div className="flex justify-between items-center gap-4 mt-6">
           <button
             onClick={switchLibrary}
