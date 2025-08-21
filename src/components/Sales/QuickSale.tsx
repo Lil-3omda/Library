@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Minus, Plus, ShoppingCart, Search, Printer } from 'lucide-react';
+import { Minus, Plus, ShoppingCart, Search, Printer, Keyboard } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { BarcodeLookup } from '../Barcode/BarcodeLookup';
+import { USBBarcodeInput } from '../Barcode/USBBarcodeInput';
 import { PrintOrder } from './PrintOrder';
 import { Product } from '../../types';
 
@@ -145,11 +146,28 @@ export function QuickSale() {
       </div>
 
       {/* Barcode Lookup Section */}
-      <BarcodeLookup 
-        onProductFound={handleProductFound}
-        onProductNotFound={handleProductNotFound}
-        autoOpenSale={true}
-      />
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <Keyboard className="w-5 h-5" />
+            إضافة منتج بالماسح
+          </h3>
+        </div>
+        
+        <USBBarcodeInput
+          onBarcodeScanned={(barcode) => {
+            const product = products.find(p => p.barcode === barcode);
+            if (product) {
+              handleProductFound(product);
+            } else {
+              handleProductNotFound(barcode);
+            }
+          }}
+          placeholder="امسح باركود المنتج لإضافته للسلة"
+          autoFocus={true}
+          label="مسح المنتجات"
+        />
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Products Grid */}

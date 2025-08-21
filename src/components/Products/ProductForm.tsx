@@ -255,15 +255,26 @@ export function ProductForm({ product, onClose }: ProductFormProps) {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 الباركود
               </label>
-              <BarcodeInput
+              <div className="space-y-4">
+                {/* Manual input */}
+                <input
+                  type="text"
+                  value={formData.barcode}
+                  onChange={(e) => handleBarcodeChange(e.target.value)}
+                  placeholder="رقم الباركود"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                
+                {/* USB Scanner input */}
+                <BarcodeInput
                 value={formData.barcode}
                 onChange={handleBarcodeChange}
                 onScan={handleBarcodeScanned}
                 placeholder="رقم الباركود"
-                allowGeneration={!isEditing} // Only allow generation for new products
-                onBarcodeExists={handleBarcodeExists}
-                checkExistingBarcode={findProductByBarcode}
+                autoFocus={false}
+                label="أو استخدم الماسح الضوئي"
               />
+              </div>
               {barcodeError && (
                 <p className="text-red-600 text-sm mt-1">{barcodeError}</p>
               )}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Edit, Trash2, Search, Package, Scan } from 'lucide-react';
+import { Edit, Trash2, Search, Package } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Product } from '../../types';
 import { ProductForm } from './ProductForm';
@@ -102,8 +102,14 @@ export function ProductList() {
 
       {/* Barcode Lookup for Quick Product Access */}
       <BarcodeLookup 
-        onProductFound={handleProductFound}
-        onProductNotFound={handleProductNotFound}
+        onBarcodeScanned={(barcode) => {
+          const product = products.find(p => p.barcode === barcode);
+          if (product) {
+            handleProductFound(product);
+          } else {
+            handleProductNotFound(barcode);
+          }
+        }}
       />
 
       {filteredProducts.length === 0 ? (

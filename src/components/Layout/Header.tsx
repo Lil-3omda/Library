@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { Bell, User, Scan } from 'lucide-react';
+import { Bell, User, Keyboard } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { BarcodeScanner } from '../Barcode/BarcodeScanner';
+import { USBBarcodeInput } from '../Barcode/USBBarcodeInput';
 import { BarcodeNotification } from '../Barcode/BarcodeNotification';
 
 export function Header() {
   const { getLowStockProducts, findProductByBarcode } = useApp();
-  const [showQuickScan, setShowQuickScan] = useState(false);
+  const [showQuickScan, setShowQuickScan] = useState(true); // Always show for USB scanner
   const [notification, setNotification] = useState<{
     type: 'success' | 'error' | 'warning' | 'info';
     title: string;
@@ -47,7 +47,6 @@ export function Header() {
         `لا يوجد منتج بالباركود: ${cleanBarcode}`
       );
     }
-    setShowQuickScan(false);
   };
 
   return (
@@ -59,14 +58,19 @@ export function Header() {
         </div>
         
         <div className="flex items-center gap-4">
-          <button
-            onClick={() => setShowQuickScan(true)}
-            className="flex items-center gap-2 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-            title="مسح سريع للباركود"
-          >
-            <Scan className="w-5 h-5" />
-            <span className="text-sm font-medium">مسح باركود</span>
-          </button>
+          {/* Quick USB Scanner */}
+          <div className="flex items-center gap-2 bg-blue-50 px-3 py-2 rounded-lg border">
+            <Keyboard className="w-5 h-5 text-blue-600" />
+            <div className="w-48">
+              <USBBarcodeInput
+                onBarcodeScanned={handleQuickScan}
+                placeholder="مسح سريع..."
+                autoFocus={false}
+                showIcon={false}
+                className="text-sm"
+              />
+            </div>
+          </div>
           
           <div className="relative">
             <Bell className="w-6 h-6 text-gray-600 hover:text-gray-900 cursor-pointer" />
@@ -83,13 +87,6 @@ export function Header() {
           </div>
         </div>
       </div>
-      
-      <BarcodeScanner
-        isOpen={showQuickScan}
-        onBarcodeDetected={handleQuickScan}
-        onClose={() => setShowQuickScan(false)}
-        title="مسح سريع للباركود"
-      />
       
       <BarcodeNotification
         type={notification.type}

@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
-import { Scan, Package, ShoppingCart, Printer, CheckCircle, XCircle } from 'lucide-react';
+import { Keyboard, Package, ShoppingCart, Printer, CheckCircle, XCircle } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { BarcodeInput } from '../Barcode/BarcodeInput';
-import { BarcodeScanner } from '../Barcode/BarcodeScanner';
+import { USBBarcodeInput } from '../Barcode/USBBarcodeInput';
 import { PrintOrder } from '../Sales/PrintOrder';
 
 export function BarcodeTestPage() {
   const { products, findProductByBarcode } = useApp();
   const [testBarcode, setTestBarcode] = useState('');
   const [scanResult, setScanResult] = useState<any>(null);
-  const [showScanner, setShowScanner] = useState(false);
   const [showPrintTest, setShowPrintTest] = useState(false);
   const [testResults, setTestResults] = useState<Array<{
     barcode: string;
@@ -66,12 +64,6 @@ export function BarcodeTestPage() {
     setTestResults(prev => [result, ...prev.slice(0, 9)]); // Keep last 10 results
   };
 
-  const handleScannerResult = (barcode: string) => {
-    setTestBarcode(barcode);
-    handleBarcodeTest(barcode);
-    setShowScanner(false);
-  };
-
   const clearResults = () => {
     setTestResults([]);
     setScanResult(null);
@@ -88,43 +80,20 @@ export function BarcodeTestPage() {
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow-md p-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <Scan className="w-6 h-6" />
-          اختبار قراءة الباركود
+          <Keyboard className="w-6 h-6" />
+          اختبار الماسح الضوئي USB
         </h2>
 
-        {/* Manual Barcode Input Test */}
+        {/* USB Scanner Test */}
         <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              اختبار قراءة الباركود
-            </label>
-            <BarcodeInput
-              value={testBarcode}
-              onChange={setTestBarcode}
-              placeholder="أدخل أو امسح الباركود للاختبار"
-              readOnlyMode={true}
-              allowGeneration={false}
-              showGenerator={false}
-              onScan={handleBarcodeTest}
-            />
-          </div>
+          <USBBarcodeInput
+            onBarcodeScanned={handleBarcodeTest}
+            placeholder="ضع المؤشر هنا وامسح الباركود للاختبار"
+            autoFocus={true}
+            label="اختبار الماسح الضوئي"
+          />
 
           <div className="flex gap-3">
-            <button
-              onClick={() => handleBarcodeTest(testBarcode)}
-              disabled={!testBarcode.trim()}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              اختبار الباركود
-            </button>
-            
-            <button
-              onClick={() => setShowScanner(true)}
-              className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center gap-2"
-            >
-              <Scan className="w-4 h-4" />
-              فتح الماسح
-            </button>
 
             <button
               onClick={clearResults}
@@ -188,7 +157,6 @@ export function BarcodeTestPage() {
                   <p className="text-xs text-gray-600 font-mono">{item.barcode}</p>
                   <button
                     onClick={() => {
-                      setTestBarcode(item.barcode || '');
                       handleBarcodeTest(item.barcode || '');
                     }}
                     className="mt-2 text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200"
@@ -263,13 +231,6 @@ export function BarcodeTestPage() {
         </div>
       </div>
 
-      {/* Scanner Modal */}
-      <BarcodeScanner
-        isOpen={showScanner}
-        onBarcodeDetected={handleScannerResult}
-        onClose={() => setShowScanner(false)}
-        title="اختبار مسح الباركود"
-      />
 
       {/* Print Test Modal */}
       {showPrintTest && (
