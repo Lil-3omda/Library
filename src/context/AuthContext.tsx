@@ -38,12 +38,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   const login = async (email: string, password: string) => {
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error;
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    console.log("Logged in:", userCredential.user);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("Login failed:", error.name, error.message);
+    } else {
+      console.error("Login failed:", error);
     }
+  }
   };
 
   const logout = async () => {
