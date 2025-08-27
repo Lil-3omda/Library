@@ -9,7 +9,7 @@ interface SidebarProps {
 export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
   const menuItems = [
     { id: 'dashboard', label: 'لوحة القيادة', icon: BarChart3 },
-    { id: 'books', label: 'إدارة الكتب', icon: BookOpen },
+    { id: 'books', label: 'إضافة منتج', icon: BookOpen },
     { id: 'products', label: 'إدارة المنتجات', icon: Package },
     { id: 'sales', label: 'إدارة المبيعات', icon: ShoppingCart },
     { id: 'users', label: 'إدارة الأعضاء', icon: Users },

@@ -7,6 +7,7 @@ import { BookList } from './Books/BookList';
 import { BookForm } from './Books/BookForm';
 import { ProductList } from './Products/ProductList';
 import { ProductForm } from './Products/ProductForm';
+import { AddProductPage } from './Products/AddProductPage';
 import { QuickSale } from './Sales/QuickSale';
 import { SalesList } from './Sales/SalesList';
 import { UserList } from './Users/UserList';
@@ -27,7 +28,7 @@ export const LibraryApp: React.FC = () => {
       case 'dashboard':
         return <Dashboard />;
       case 'books':
-        return <BookList onAddBook={() => setShowAddBook(true)} />;
+        return <AddProductPage />;
       case 'products':
         return <ProductList />;
       case 'sales':

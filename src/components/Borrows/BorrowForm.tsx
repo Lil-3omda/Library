@@ -89,7 +89,7 @@ export const BorrowForm: React.FC<BorrowFormProps> = ({ onClose }) => {
       onClose();
     } catch (error) {
       console.error('Error creating borrow record:', error);
-      alert('Failed to create borrow record. Please try again.');
+      alert('فشل في إنشاء سجل الإعارة. يرجى المحاولة مرة أخرى.');
     } finally {
       setLoading(false);
     }
@@ -130,8 +130,8 @@ export const BorrowForm: React.FC<BorrowFormProps> = ({ onClose }) => {
                 value={barcode}
                 onChange={setBarcode}
                 onScan={handleBarcodeScanned}
-                label="Scan Book Barcode (Optional)"
-                placeholder="Scan barcode to auto-select book"
+                label="مسح باركود الكتاب (اختياري)"
+                placeholder="امسح الباركود لاختيار الكتاب تلقائيا"
               />
             </div>
 

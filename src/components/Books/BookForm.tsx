@@ -135,7 +135,7 @@ export const BookForm: React.FC<BookFormProps> = ({ book, onClose }) => {
       onClose();
     } catch (error) {
       console.error('Error saving book:', error);
-      alert('Failed to save book. Please try again.');
+      alert('فشل في حفظ الكتاب. يرجى المحاولة مرة أخرى.');
     } finally {
       setLoading(false);
     }
@@ -178,7 +178,7 @@ export const BookForm: React.FC<BookFormProps> = ({ book, onClose }) => {
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.title ? 'border-red-500' : 'border-gray-300'
                   }`}
-                  placeholder="Enter book title"
+                  placeholder="أدخل عنوان الكتاب"
                 />
                 {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
               </div>
@@ -194,7 +194,7 @@ export const BookForm: React.FC<BookFormProps> = ({ book, onClose }) => {
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.author ? 'border-red-500' : 'border-gray-300'
                   }`}
-                  placeholder="Enter author name"
+                  placeholder="أدخل اسم المؤلف"
                 />
                 {errors.author && <p className="text-red-500 text-sm mt-1">{errors.author}</p>}
               </div>
@@ -212,7 +212,7 @@ export const BookForm: React.FC<BookFormProps> = ({ book, onClose }) => {
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.isbn ? 'border-red-500' : 'border-gray-300'
                   }`}
-                  placeholder="Enter ISBN (10 or 13 digits)"
+                  placeholder="أدخل الردمك (10 أو 13 رقم)"
                 />
                 {errors.isbn && <p className="text-red-500 text-sm mt-1">{errors.isbn}</p>}
               </div>
@@ -259,7 +259,7 @@ export const BookForm: React.FC<BookFormProps> = ({ book, onClose }) => {
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.publisher ? 'border-red-500' : 'border-gray-300'
                   }`}
-                  placeholder="Enter publisher name"
+                  placeholder="أدخل اسم الناشر"
                 />
                 {errors.publisher && <p className="text-red-500 text-sm mt-1">{errors.publisher}</p>}
               </div>
@@ -275,7 +275,7 @@ export const BookForm: React.FC<BookFormProps> = ({ book, onClose }) => {
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.publicationYear ? 'border-red-500' : 'border-gray-300'
                   }`}
-                  placeholder="Enter publication year"
+                  placeholder="أدخل سنة النشر"
                   min="1000"
                   max={new Date().getFullYear() + 1}
                 />
@@ -300,7 +300,7 @@ export const BookForm: React.FC<BookFormProps> = ({ book, onClose }) => {
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.totalCopies ? 'border-red-500' : 'border-gray-300'
                   }`}
-                  placeholder="Number of total copies"
+                  placeholder="عدد النسخ الإجمالي"
                   min="1"
                 />
                 {errors.totalCopies && <p className="text-red-500 text-sm mt-1">{errors.totalCopies}</p>}
@@ -317,7 +317,7 @@ export const BookForm: React.FC<BookFormProps> = ({ book, onClose }) => {
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.availableCopies ? 'border-red-500' : 'border-gray-300'
                   }`}
-                  placeholder="Number of available copies"
+                  placeholder="عدد النسخ المتاحة"
                   min="0"
                   max={formData.totalCopies}
                 />
@@ -334,33 +334,33 @@ export const BookForm: React.FC<BookFormProps> = ({ book, onClose }) => {
                 value={formData.location}
                 onChange={(e) => handleInputChange('location', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="e.g., A1-Fiction, B2-Science"
+                placeholder="مثال: أ1-الأدب، ب2-العلوم"
               />
             </div>
           </div>
 
           {/* Barcode */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900">Barcode</h3>
+            <h3 className="text-lg font-medium text-gray-900">الباركود</h3>
             <BarcodeInput
               value={formData.barcode}
               onChange={(value) => handleInputChange('barcode', value)}
               onScan={handleBarcodeScanned}
               label="Barcode (Optional)"
-              placeholder="Scan or enter barcode"
+              placeholder="امسح أو أدخل الباركود"
             />
             {errors.barcode && <p className="text-red-500 text-sm mt-1">{errors.barcode}</p>}
           </div>
 
           {/* Description */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900">Description</h3>
+            <h3 className="text-lg font-medium text-gray-900">الوصف</h3>
             <textarea
               value={formData.description}
               onChange={(e) => handleInputChange('description', e.target.value)}
               rows={3}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter book description (optional)"
+              placeholder="أدخل وصف الكتاب (اختياري)"
             />
           </div>
 

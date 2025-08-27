@@ -85,7 +85,7 @@ export function Header() {
           <Package className="w-8 h-8 text-blue-600" />
           <div>
             <h1 className="text-2xl font-bold text-gray-900">نظام إدارة القرطاسية</h1>
-            <p className="text-sm text-gray-600">إدارة الكتب والمنتجات والمبيعات</p>
+            <p className="text-sm text-gray-600">إضافة وإدارة المنتجات والمبيعات</p>
           </div>
         </div>
         

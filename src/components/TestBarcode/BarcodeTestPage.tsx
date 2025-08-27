@@ -138,8 +138,8 @@ export function BarcodeTestPage() {
             <div>
               <USBBarcodeInput
                 onBarcodeScanned={handleBarcodeTest}
-                placeholder="Focus here and scan with USB barcode scanner..."
-                label="USB Scanner Input"
+                placeholder="ركز هنا وامسح باستخدام ماسح الباركود USB..."
+                label="مدخل ماسح USB"
                 autoFocus={true}
               />
             </div>
@@ -150,7 +150,7 @@ export function BarcodeTestPage() {
                 value={testBarcode}
                 onChange={setTestBarcode}
                 onScan={handleBarcodeTest}
-                label="Multi-mode Barcode Input"
+                label="مدخل الباركود متعدد الأنماط"
                 showTestMode={true}
               />
             </div>
