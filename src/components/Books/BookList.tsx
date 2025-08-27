@@ -30,12 +30,12 @@ export const BookList: React.FC<BookListProps> = ({ onAddBook }) => {
   const categories = [...new Set(books.map(book => book.category))];
 
   const handleDelete = async (book: Book) => {
-    if (window.confirm(`Are you sure you want to delete "${book.title}"?`)) {
+    if (window.confirm(`هل أنت متأكد من حذف الكتاب "${book.title}"؟`)) {
       try {
         await deleteBook(book.id);
       } catch (error) {
         console.error('Error deleting book:', error);
-        alert('Failed to delete book');
+        alert('فشل في حذف الكتاب');
       }
     }
   };
@@ -47,9 +47,9 @@ export const BookList: React.FC<BookListProps> = ({ onAddBook }) => {
   };
 
   const getAvailabilityText = (book: Book) => {
-    if (book.availableCopies === 0) return 'Out of Stock';
-    if (book.availableCopies < 2) return 'Low Stock';
-    return 'Available';
+    if (book.availableCopies === 0) return 'غير متوفر';
+    if (book.availableCopies < 2) return 'مخزون منخفض';
+    return 'متوفر';
   };
 
   return (

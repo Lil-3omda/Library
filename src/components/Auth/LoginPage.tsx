@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LogIn, BookOpen, Key, User } from 'lucide-react';
+import { LogIn, Package, Key, User } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 export const LoginPage: React.FC = () => {
@@ -19,7 +19,7 @@ export const LoginPage: React.FC = () => {
     try {
       await login(email, password);
     } catch (error: any) {
-      setError(error.message || 'Failed to login');
+      setError(error.message || 'فشل في تسجيل الدخول');
     } finally {
       setLoading(false);
     }
@@ -32,9 +32,9 @@ export const LoginPage: React.FC = () => {
     try {
       await createAdminUser();
       setShowSeedData(false);
-      alert('Seed data created successfully! You can now login with admin@library.com / Admin123');
+      alert('تم إنشاء البيانات التجريبية بنجاح! يمكنك الآن تسجيل الدخول باستخدام admin@library.com / Admin123');
     } catch (error: any) {
-      setError(error.message || 'Failed to create seed data');
+      setError(error.message || 'فشل في إنشاء البيانات التجريبية');
     } finally {
       setLoading(false);
     }
@@ -50,9 +50,9 @@ export const LoginPage: React.FC = () => {
       <div className="max-w-md w-full bg-white rounded-lg shadow-xl overflow-hidden">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white text-center">
-          <BookOpen className="w-12 h-12 mx-auto mb-2" />
-          <h1 className="text-2xl font-bold">Library Management System</h1>
-          <p className="text-blue-100 mt-1">Secure Access Portal</p>
+          <Package className="w-12 h-12 mx-auto mb-2" />
+          <h1 className="text-2xl font-bold">نظام إدارة القرطاسية</h1>
+          <p className="text-blue-100 mt-1">بوابة الدخول الآمنة</p>
         </div>
 
         {/* Login Form */}
@@ -66,7 +66,7 @@ export const LoginPage: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email Address
+                البريد الإلكتروني
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -76,7 +76,7 @@ export const LoginPage: React.FC = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter your email"
+                  placeholder="أدخل بريدك الإلكتروني"
                   required
                 />
               </div>
@@ -84,7 +84,7 @@ export const LoginPage: React.FC = () => {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                Password
+                كلمة المرور
               </label>
               <div className="relative">
                 <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -94,7 +94,7 @@ export const LoginPage: React.FC = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter your password"
+                  placeholder="أدخل كلمة المرور"
                   required
                 />
               </div>
@@ -109,8 +109,8 @@ export const LoginPage: React.FC = () => {
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
               ) : (
                 <>
-                  <LogIn className="w-5 h-5 mr-2" />
-                  Sign In
+                  <LogIn className="w-5 h-5 ml-2" />
+                  تسجيل الدخول
                 </>
               )}
             </button>
@@ -119,7 +119,7 @@ export const LoginPage: React.FC = () => {
           {/* Demo/Test Section */}
           <div className="mt-6 pt-4 border-t border-gray-200">
             <div className="text-sm text-gray-600 mb-3">
-              <strong>Demo Mode:</strong>
+              <strong>النمط التجريبي:</strong>
             </div>
             
             <div className="flex flex-col space-y-2">
@@ -128,7 +128,7 @@ export const LoginPage: React.FC = () => {
                 onClick={fillAdminCredentials}
                 className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-3 rounded border transition-colors"
               >
-                Fill Admin Credentials
+تعبئة بيانات المدير
               </button>
               
               <button
@@ -136,24 +136,24 @@ export const LoginPage: React.FC = () => {
                 onClick={() => setShowSeedData(!showSeedData)}
                 className="text-sm bg-green-100 hover:bg-green-200 text-green-800 py-2 px-3 rounded border transition-colors"
               >
-                {showSeedData ? 'Hide' : 'Show'} Seed Data Options
+{showSeedData ? 'إخفاء' : 'عرض'} خيارات البيانات التجريبية
               </button>
             </div>
 
             {showSeedData && (
               <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded">
                 <p className="text-sm text-yellow-800 mb-2">
-                  Create demo admin account and sample data:
+                  إنشاء حساب مدير تجريبي وبيانات تجريبية:
                 </p>
                 <button
                   onClick={handleCreateSeedData}
                   disabled={loading}
                   className="w-full text-sm bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-3 rounded disabled:opacity-50"
                 >
-                  Create Seed Data
+إنشاء البيانات التجريبية
                 </button>
                 <div className="mt-2 text-xs text-yellow-700">
-                  <strong>Admin:</strong> admin@library.com / Admin123
+                  <strong>المدير:</strong> admin@library.com / Admin123
                 </div>
               </div>
             )}

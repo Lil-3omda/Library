@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LibraryProvider } from './context/LibraryContext';
+import { AppProvider } from './context/AppContext';
 import { LoginPage } from './components/Auth/LoginPage';
 import { LibraryApp } from './components/LibraryApp';
 import { LoadingSpinner } from './components/LoadingSpinner';
@@ -33,7 +34,9 @@ function App() {
   return (
     <AuthProvider>
       <LibraryProvider>
-        <AppContent />
+        <AppProvider>
+          <AppContent />
+        </AppProvider>
       </LibraryProvider>
     </AuthProvider>
   );
