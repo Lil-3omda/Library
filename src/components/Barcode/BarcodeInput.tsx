@@ -82,8 +82,8 @@ export function BarcodeInput({
         <USBBarcodeInput
           onBarcodeScanned={handleBarcodeScanned}
           autoFocus={autoFocus}
-          label="Scanner Input (Panzer USB Scanner)"
-          placeholder="Focus here and scan barcode..."
+          label="مدخل الماسح (ماسح Panzer USB)"
+          placeholder="ركز هنا وامسح الباركود..."
         />
       </div>
 
@@ -113,7 +113,7 @@ export function BarcodeInput({
                     type="text"
                     value={testBarcode}
                     onChange={(e) => setTestBarcode(e.target.value)}
-                    placeholder="Enter test barcode"
+                    placeholder="أدخل باركود تجريبي"
                     className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
                     onKeyPress={(e) => e.key === 'Enter' && handleTestScan()}
                   />

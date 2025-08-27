@@ -8,17 +8,17 @@ export function DataManagement() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleCreateSeedData = async () => {
-    if (!window.confirm('This will create sample books and members. Continue?')) {
+    if (!window.confirm('هذا سينشئ عينات من الكتب والأعضاء. هل تريد المتابعة؟')) {
       return;
     }
 
     setLoading(true);
     try {
       await createSeedData();
-      alert('Sample data created successfully!');
+      alert('تم إنشاء البيانات التجريبية بنجاح!');
     } catch (error) {
       console.error('Error creating seed data:', error);
-      alert('Failed to create seed data. Please try again.');
+      alert('فشل في إنشاء البيانات التجريبية. يرجى المحاولة مرة أخرى.');
     } finally {
       setLoading(false);
     }
@@ -33,9 +33,9 @@ export function DataManagement() {
       try {
         const jsonData = JSON.parse(e.target?.result as string);
         // TODO: Implement import for library data
-        alert('Import functionality will be implemented with Firebase integration!');
+        alert('سيتم تنفيذ وظيفة الاستيراد مع تكامل Firebase!');
       } catch (error) {
-        alert('Error reading file. Make sure it\'s a valid JSON file.');
+        alert('خطأ في قراءة الملف. تأكد من أنه ملف JSON صالح.');
       }
     };
     reader.readAsText(file);

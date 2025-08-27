@@ -26,7 +26,7 @@ export const UserList: React.FC = () => {
         await deleteLibraryUser(user.id);
       } catch (error) {
         console.error('Error deleting user:', error);
-        alert('Failed to delete user');
+        alert('فشل في حذف المستخدم');
       }
     }
   };
@@ -71,7 +71,7 @@ export const UserList: React.FC = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
-                placeholder="Search by name, email, or phone..."
+                placeholder="البحث بالاسم أو البريد الإلكتروني أو الهاتف..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -165,14 +165,14 @@ export const UserList: React.FC = () => {
                 <div className="flex gap-1 ml-2">
                   <button
                     className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
-                    title="Edit member"
+                    title="تعديل العضو"
                   >
                     <Edit className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDelete(user)}
                     className="p-1 text-gray-400 hover:text-red-600 transition-colors"
-                    title="Delete member"
+                    title="حذف العضو"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
