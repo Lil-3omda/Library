@@ -5,15 +5,21 @@ import { Sidebar } from './Layout/Sidebar';
 import { Dashboard } from './Dashboard/Dashboard';
 import { BookList } from './Books/BookList';
 import { BookForm } from './Books/BookForm';
+import { ProductList } from './Products/ProductList';
+import { ProductForm } from './Products/ProductForm';
+import { QuickSale } from './Sales/QuickSale';
+import { SalesList } from './Sales/SalesList';
 import { UserList } from './Users/UserList';
 import { BorrowList } from './Borrows/BorrowList';
 import { BorrowForm } from './Borrows/BorrowForm';
+import { LowStockAlert } from './LowStock/LowStockAlert';
 import { DataManagement } from './Settings/DataManagement';
 import { BarcodeTestPage } from './TestBarcode/BarcodeTestPage';
 
 export const LibraryApp: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showAddBook, setShowAddBook] = useState(false);
+  const [showAddProduct, setShowAddProduct] = useState(false);
   const [showBorrowForm, setShowBorrowForm] = useState(false);
 
   const renderContent = () => {
@@ -22,10 +28,16 @@ export const LibraryApp: React.FC = () => {
         return <Dashboard />;
       case 'books':
         return <BookList onAddBook={() => setShowAddBook(true)} />;
+      case 'products':
+        return <ProductList />;
+      case 'sales':
+        return <QuickSale />;
       case 'users':
         return <UserList />;
       case 'borrows':
         return <BorrowList onAddBorrow={() => setShowBorrowForm(true)} />;
+      case 'low-stock':
+        return <LowStockAlert />;
       case 'settings':
         return <DataManagement />;
       case 'barcode-test':
@@ -50,6 +62,10 @@ export const LibraryApp: React.FC = () => {
       {/* Modals */}
       {showAddBook && (
         <BookForm onClose={() => setShowAddBook(false)} />
+      )}
+      
+      {showAddProduct && (
+        <ProductForm onClose={() => setShowAddProduct(false)} />
       )}
       
       {showBorrowForm && (

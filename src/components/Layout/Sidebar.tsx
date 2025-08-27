@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, Users, RotateCcw, BarChart3, Settings, AlertTriangle, TestTube } from 'lucide-react';
+import { BookOpen, Users, RotateCcw, BarChart3, Settings, AlertTriangle, TestTube, Package, ShoppingCart } from 'lucide-react';
 
 interface SidebarProps {
   activeTab: string;
@@ -8,20 +8,23 @@ interface SidebarProps {
 
 export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
-    { id: 'books', label: 'Books', icon: BookOpen },
-    { id: 'users', label: 'Members', icon: Users },
-    { id: 'borrows', label: 'Borrowing', icon: RotateCcw },
-    { id: 'barcode-test', label: 'Barcode Test', icon: TestTube },
-    { id: 'settings', label: 'Settings', icon: Settings },
+    { id: 'dashboard', label: 'لوحة القيادة', icon: BarChart3 },
+    { id: 'books', label: 'إدارة الكتب', icon: BookOpen },
+    { id: 'products', label: 'إدارة المنتجات', icon: Package },
+    { id: 'sales', label: 'إدارة المبيعات', icon: ShoppingCart },
+    { id: 'users', label: 'إدارة الأعضاء', icon: Users },
+    { id: 'borrows', label: 'إدارة الإعارة', icon: RotateCcw },
+    { id: 'low-stock', label: 'تنبيه المخزون', icon: AlertTriangle },
+    { id: 'barcode-test', label: 'اختبار الباركود', icon: TestTube },
+    { id: 'settings', label: 'الإعدادات', icon: Settings },
   ];
 
   return (
     <aside className="bg-gray-900 text-white w-64 min-h-screen p-4">
       <div className="mb-8 text-center">
-        <BookOpen className="w-8 h-8 mx-auto mb-2 text-blue-400" />
-        <h2 className="text-xl font-bold">Digital Library</h2>
-        <p className="text-xs text-gray-400">Management System</p>
+        <Package className="w-8 h-8 mx-auto mb-2 text-blue-400" />
+        <h2 className="text-xl font-bold">نظام إدارة القرطاسية</h2>
+        <p className="text-xs text-gray-400">متجر المكتبة المتكامل</p>
       </div>
       
       <nav>

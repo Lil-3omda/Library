@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { Bell, User, Keyboard, LogOut, BookOpen } from 'lucide-react';
+import { Bell, User, Keyboard, LogOut, Package } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useLibrary } from '../../context/LibraryContext';
+import { useApp } from '../../context/AppContext';
 import { USBBarcodeInput } from '../Barcode/USBBarcodeInput';
 import { BarcodeNotification } from '../Barcode/BarcodeNotification';
 
 export function Header() {
   const { currentUser, logout } = useAuth();
   const { books, findBookByBarcode } = useLibrary();
+  const { products, findProductByBarcode, getLowStockProducts } = useApp();
   const [notification, setNotification] = useState<{
     type: 'success' | 'error' | 'warning' | 'info';
     title: string;
@@ -20,8 +22,10 @@ export function Header() {
     isVisible: false
   });
   
-  // Calculate low stock books (less than 2 available copies)
-  const lowStockCount = books.filter(book => book.availableCopies < 2).length;
+  // Calculate low stock books (less than 2 available copies) and low stock products
+  const lowStockBooks = books.filter(book => book.availableCopies < 2).length;
+  const lowStockProducts = getLowStockProducts().length;
+  const totalLowStock = lowStockBooks + lowStockProducts;
 
   const showNotification = (type: 'success' | 'error' | 'warning' | 'info', title: string, message: string) => {
     setNotification({
@@ -35,21 +39,35 @@ export function Header() {
   const handleQuickScan = async (barcode: string) => {
     // Clean the barcode before searching
     const cleanBarcode = barcode.trim();
-    const book = await findBookByBarcode(cleanBarcode);
     
+    // First try to find a book
+    const book = await findBookByBarcode(cleanBarcode);
     if (book) {
       showNotification(
         'success',
-        'Book Found',
-        `${book.title} by ${book.author}\nAvailable: ${book.availableCopies}/${book.totalCopies}\nISBN: ${book.isbn}\nLocation: ${book.location || 'Not specified'}`
+        'تم العثور على الكتاب',
+        `${book.title} بواسطة ${book.author}\nمتوفر: ${book.availableCopies}/${book.totalCopies}\nردمك: ${book.isbn}\nالموقع: ${book.location || 'غير محدد'}`
       );
-    } else {
-      showNotification(
-        'error',
-        'Book Not Found',
-        `No book found with barcode: ${cleanBarcode}`
-      );
+      return;
     }
+    
+    // Then try to find a product
+    const product = findProductByBarcode(cleanBarcode);
+    if (product) {
+      showNotification(
+        'success',
+        'تم العثور على المنتج',
+        `${product.name}\nالفئة: ${product.category}\nالكمية: ${product.quantity}\nالسعر: ${product.sellingPrice} دينار`
+      );
+      return;
+    }
+    
+    // Nothing found
+    showNotification(
+      'error',
+      'لم يتم العثور على النتيجة',
+      `لا يوجد كتاب أو منتج بالباركود: ${cleanBarcode}`
+    );
   };
 
   const handleLogout = async () => {
@@ -64,10 +82,10 @@ export function Header() {
     <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <BookOpen className="w-8 h-8 text-blue-600" />
+          <Package className="w-8 h-8 text-blue-600" />
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Library Management System</h1>
-            <p className="text-sm text-gray-600">Book Inventory & Borrowing Management</p>
+            <h1 className="text-2xl font-bold text-gray-900">نظام إدارة القرطاسية</h1>
+            <p className="text-sm text-gray-600">إدارة الكتب والمنتجات والمبيعات</p>
           </div>
         </div>
         
@@ -78,7 +96,7 @@ export function Header() {
             <div className="w-48">
               <USBBarcodeInput
                 onBarcodeScanned={handleQuickScan}
-                placeholder="Quick scan..."
+                placeholder="مسح سريع..."
                 autoFocus={false}
                 showIcon={false}
                 className="text-sm"
@@ -88,9 +106,9 @@ export function Header() {
           
           <div className="relative">
             <Bell className="w-6 h-6 text-gray-600 hover:text-gray-900 cursor-pointer" />
-            {lowStockCount > 0 && (
+            {totalLowStock > 0 && (
               <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                {lowStockCount}
+                {totalLowStock}
               </span>
             )}
           </div>
@@ -105,10 +123,10 @@ export function Header() {
           <button
             onClick={handleLogout}
             className="flex items-center gap-2 text-gray-600 hover:text-red-600 px-3 py-2 rounded-lg hover:bg-red-50 transition-colors"
-            title="Logout"
+            title="تسجيل الخروج"
           >
             <LogOut className="w-5 h-5" />
-            <span className="text-sm font-medium">Logout</span>
+            <span className="text-sm font-medium">تسجيل الخروج</span>
           </button>
         </div>
       </div>
