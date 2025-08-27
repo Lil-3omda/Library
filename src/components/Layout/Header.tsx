@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Bell, User, Keyboard } from 'lucide-react';
-import { useApp } from '../../context/AppContext';
+import { Bell, User, Keyboard, LogOut, BookOpen } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { useLibrary } from '../../context/LibraryContext';
 import { USBBarcodeInput } from '../Barcode/USBBarcodeInput';
 import { BarcodeNotification } from '../Barcode/BarcodeNotification';
 
 export function Header() {
-  const { getLowStockProducts, findProductByBarcode } = useApp();
-  const [showQuickScan, setShowQuickScan] = useState(true); // Always show for USB scanner
+  const { currentUser, logout } = useAuth();
+  const { books, findBookByBarcode } = useLibrary();
   const [notification, setNotification] = useState<{
     type: 'success' | 'error' | 'warning' | 'info';
     title: string;
@@ -18,7 +19,9 @@ export function Header() {
     message: '',
     isVisible: false
   });
-  const lowStockCount = getLowStockProducts().length;
+  
+  // Calculate low stock books (less than 2 available copies)
+  const lowStockCount = books.filter(book => book.availableCopies < 2).length;
 
   const showNotification = (type: 'success' | 'error' | 'warning' | 'info', title: string, message: string) => {
     setNotification({
@@ -29,32 +32,43 @@ export function Header() {
     });
   };
 
-  const handleQuickScan = (barcode: string) => {
+  const handleQuickScan = async (barcode: string) => {
     // Clean the barcode before searching
     const cleanBarcode = barcode.trim();
-    const product = findProductByBarcode(cleanBarcode);
+    const book = await findBookByBarcode(cleanBarcode);
     
-    if (product) {
+    if (book) {
       showNotification(
         'success',
-        'تم العثور على المنتج',
-        `${product.name}\nالكمية: ${product.quantity}\nالسعر: ${product.sellingPrice.toLocaleString()} د.ع\nالباركود: ${product.barcode}`
+        'Book Found',
+        `${book.title} by ${book.author}\nAvailable: ${book.availableCopies}/${book.totalCopies}\nISBN: ${book.isbn}\nLocation: ${book.location || 'Not specified'}`
       );
     } else {
       showNotification(
         'error',
-        'لم يتم العثور على المنتج',
-        `لا يوجد منتج بالباركود: ${cleanBarcode}`
+        'Book Not Found',
+        `No book found with barcode: ${cleanBarcode}`
       );
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Logout failed:', error);
     }
   };
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">نظام إدارة المكتبة</h1>
-          <p className="text-sm text-gray-600">إدارة المخزون والمبيعات</p>
+        <div className="flex items-center gap-3">
+          <BookOpen className="w-8 h-8 text-blue-600" />
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Library Management System</h1>
+            <p className="text-sm text-gray-600">Book Inventory & Borrowing Management</p>
+          </div>
         </div>
         
         <div className="flex items-center gap-4">
@@ -64,7 +78,7 @@ export function Header() {
             <div className="w-48">
               <USBBarcodeInput
                 onBarcodeScanned={handleQuickScan}
-                placeholder="مسح سريع..."
+                placeholder="Quick scan..."
                 autoFocus={false}
                 showIcon={false}
                 className="text-sm"
@@ -83,8 +97,19 @@ export function Header() {
           
           <div className="flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-2">
             <User className="w-5 h-5 text-gray-600" />
-            <span className="text-sm font-medium text-gray-700">المدير</span>
+            <span className="text-sm font-medium text-gray-700">
+              {currentUser?.email || 'Admin'}
+            </span>
           </div>
+          
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 text-gray-600 hover:text-red-600 px-3 py-2 rounded-lg hover:bg-red-50 transition-colors"
+            title="Logout"
+          >
+            <LogOut className="w-5 h-5" />
+            <span className="text-sm font-medium">Logout</span>
+          </button>
         </div>
       </div>
       
