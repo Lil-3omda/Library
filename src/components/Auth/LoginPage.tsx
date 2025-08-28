@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LogIn, Package, Key, User } from 'lucide-react';
+import { LogIn, Package, Key, User, Instagram, Send } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 export const LoginPage: React.FC = () => {
@@ -51,7 +51,7 @@ export const LoginPage: React.FC = () => {
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white text-center">
           <Package className="w-12 h-12 mx-auto mb-2" />
-          <h1 className="text-2xl font-bold">نظام إدارة القرطاسية</h1>
+          <h1 className="text-2xl font-bold">مكتبة المربد</h1>
           <p className="text-blue-100 mt-1">بوابة الدخول الآمنة</p>
         </div>
 
@@ -157,6 +157,33 @@ export const LoginPage: React.FC = () => {
                 </div>
               </div>
             )}
+          </div>
+          
+          {/* Social Media Section */}
+          <div className="mt-6 pt-4 border-t border-gray-200">
+            <div className="text-sm text-gray-600 mb-3 text-center">
+              <strong>تابعنا على:</strong>
+            </div>
+            <div className="flex justify-center gap-4">
+              <a
+                href="https://instagram.com/MS__5K"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-pink-600 hover:text-pink-800 transition-colors"
+              >
+                <Instagram className="w-5 h-5" />
+                <span className="text-sm">@MS__5K</span>
+              </a>
+              <a
+                href="https://t.me/ms93f"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors"
+              >
+                <Send className="w-5 h-5" />
+                <span className="text-sm">@ms93f</span>
+              </a>
+            </div>
           </div>
         </div>
       </div>

@@ -1,6 +1,10 @@
-# Library Management System
+# مكتبة المربد - Library Management System
 
-A modern, web-based library management system built with React, TypeScript, Firebase, and Tailwind CSS. Features barcode scanning, user management, book borrowing, and real-time data synchronization.
+A modern, web-based library management system for مكتبة المربد built with React, TypeScript, Firebase, and Tailwind CSS. Features barcode scanning, user management, book borrowing, and real-time data synchronization.
+
+## 📱 Social Media
+- **Instagram**: [@MS__5K](https://instagram.com/MS__5K)
+- **Telegram**: [@ms93f](https://t.me/ms93f)
 
 ## 🚀 Features
 
