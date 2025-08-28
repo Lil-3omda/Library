@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Save, Package } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Save, Package, Upload, FileText, CheckCircle, AlertCircle } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Product } from '../../types';
 import { BarcodeInput } from '../Barcode/BarcodeInput';
@@ -24,6 +24,14 @@ export function AddProductPage() {
   const [showExistingProductDialog, setShowExistingProductDialog] = useState(false);
   const [existingProduct, setExistingProduct] = useState<Product | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [showCSVImport, setShowCSVImport] = useState(false);
+  const [csvData, setCsvData] = useState<string>('');
+  const [importResults, setImportResults] = useState<{
+    success: number;
+    failed: number;
+    errors: string[];
+  } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Validate barcode uniqueness
   const validateBarcode = (barcode: string) => {
@@ -71,6 +79,86 @@ export function AddProductPage() {
       setTimeout(() => setIsSubmitted(false), 3000);
     } catch (error) {
       console.error('Error adding product:', error);
+    }
+  };
+
+  const parseCSV = (csvText: string) => {
+    const lines = csvText.trim().split('\n');
+    const headers = lines[0].split(',');
+    const products = [];
+    
+    for (let i = 1; i < lines.length; i++) {
+      const values = lines[i].split(',');
+      if (values.length >= headers.length) {
+        const product = {
+          name: values[0]?.trim() || '',
+          category: values[1]?.trim() || 'قرطاسية',
+          barcode: values[3]?.trim() || '',
+          costPrice: parseFloat(values[5]) || 0,
+          sellingPrice: parseFloat(values[7]) || 0,
+          quantity: parseInt(values[15]) || 0,
+          minQuantity: parseInt(values[17]) || 5,
+          supplier: values[16]?.trim() || '',
+          description: values[14]?.trim() || '',
+        };
+        
+        if (product.name) {
+          products.push(product);
+        }
+      }
+    }
+    
+    return products;
+  };
+
+  const handleCSVImport = async () => {
+    if (!csvData.trim()) {
+      alert('يرجى إدخال بيانات CSV أولاً');
+      return;
+    }
+
+    try {
+      const parsedProducts = parseCSV(csvData);
+      let successCount = 0;
+      let failedCount = 0;
+      const errors: string[] = [];
+
+      for (const productData of parsedProducts) {
+        try {
+          await addProduct(productData);
+          successCount++;
+        } catch (error) {
+          failedCount++;
+          errors.push(`فشل في إضافة المنتج "${productData.name}": ${error}`);
+        }
+      }
+
+      setImportResults({
+        success: successCount,
+        failed: failedCount,
+        errors: errors.slice(0, 10) // Show only first 10 errors
+      });
+
+      setCsvData('');
+    } catch (error) {
+      alert('خطأ في معالجة ملف CSV. يرجى التحقق من التنسيق.');
+    }
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      setCsvData(text);
+    };
+    reader.readAsText(file, 'UTF-8');
+
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -140,6 +228,15 @@ export function AddProductPage() {
           <h1 className="text-3xl font-bold text-gray-900">إضافة منتج جديد - مكتبة المربد</h1>
           <p className="text-gray-600">أضف منتجاً جديداً تحت أي فئة من الفئات المتاحة في مكتبة المربد</p>
         </div>
+        <div className="mr-auto">
+          <button
+            onClick={() => setShowCSVImport(!showCSVImport)}
+            className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+          >
+            <Upload className="w-5 h-5" />
+            استيراد من CSV
+          </button>
+        </div>
       </div>
 
       {isSubmitted && (
@@ -151,6 +248,111 @@ export function AddProductPage() {
               </svg>
             </div>
             <p className="mr-3 text-sm text-green-700">تم إضافة المنتج بنجاح!</p>
+          </div>
+        </div>
+      )}
+
+      {/* CSV Import Section */}
+      {showCSVImport && (
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="flex items-center gap-3 mb-4">
+            <FileText className="w-6 h-6 text-green-600" />
+            <h2 className="text-xl font-bold text-gray-900">استيراد المنتجات من ملف CSV</h2>
+          </div>
+
+          <div className="space-y-4">
+            {/* File Upload */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                اختر ملف CSV
+              </label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv"
+                onChange={handleFileUpload}
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+              />
+            </div>
+
+            {/* CSV Data Textarea */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                أو الصق بيانات CSV هنا
+              </label>
+              <textarea
+                value={csvData}
+                onChange={(e) => setCsvData(e.target.value)}
+                rows={10}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 font-mono text-sm"
+                placeholder="Name,ProductGroup,SKU,Barcode,MeasurementUnit,Cost,Markup,Price,Tax,IsTaxInclusivePrice,IsPriceChangeAllowed,IsUsingDefaultQuantity,IsService,IsEnabled,Description,Quantity,Supplier,ReorderPoint,PreferredQuantity,LowStockWarning,WarningQuantity&#10;كلبس كابسة دلي,قرطاسية,1,6921734922717,قطعه,0,0,1000.0,,1,0,1,0,1,,-1,,,,"
+              />
+            </div>
+
+            {/* Import Instructions */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 className="font-medium text-blue-900 mb-2">تعليمات الاستيراد:</h4>
+              <ul className="text-sm text-blue-800 space-y-1">
+                <li>• العمود الأول: اسم المنتج (مطلوب)</li>
+                <li>• العمود الثاني: الفئة</li>
+                <li>• العمود الرابع: الباركود</li>
+                <li>• العمود السادس: سعر التكلفة</li>
+                <li>• العمود الثامن: سعر البيع</li>
+                <li>• العمود السادس عشر: الكمية</li>
+                <li>• العمود السابع عشر: المورد</li>
+                <li>• العمود الخامس عشر: الوصف</li>
+              </ul>
+            </div>
+
+            {/* Import Button */}
+            <div className="flex gap-4">
+              <button
+                onClick={handleCSVImport}
+                disabled={!csvData.trim()}
+                className="flex items-center gap-2 bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <Upload className="w-5 h-5" />
+                استيراد المنتجات
+              </button>
+              <button
+                onClick={() => {
+                  setShowCSVImport(false);
+                  setCsvData('');
+                  setImportResults(null);
+                }}
+                className="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                إلغاء
+              </button>
+            </div>
+
+            {/* Import Results */}
+            {importResults && (
+              <div className="mt-6 p-4 border rounded-lg">
+                <h4 className="font-medium text-gray-900 mb-3">نتائج الاستيراد:</h4>
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="flex items-center gap-2 text-green-600">
+                    <CheckCircle className="w-5 h-5" />
+                    <span>تم بنجاح: {importResults.success}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-red-600">
+                    <AlertCircle className="w-5 h-5" />
+                    <span>فشل: {importResults.failed}</span>
+                  </div>
+                </div>
+                
+                {importResults.errors.length > 0 && (
+                  <div>
+                    <h5 className="font-medium text-red-800 mb-2">الأخطاء:</h5>
+                    <ul className="text-sm text-red-700 space-y-1 max-h-32 overflow-y-auto">
+                      {importResults.errors.map((error, index) => (
+                        <li key={index}>• {error}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}
