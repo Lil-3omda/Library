@@ -117,7 +117,7 @@ export const LoginPage: React.FC = () => {
           </form>
 
           {/* Demo/Test Section */}
-          <div className="mt-6 pt-4 border-t border-gray-200">
+          {/* <div className="mt-6 pt-4 border-t border-gray-200">
             <div className="text-sm text-gray-600 mb-3">
               <strong>النمط التجريبي:</strong>
             </div>
@@ -157,7 +157,7 @@ export const LoginPage: React.FC = () => {
                 </div>
               </div>
             )}
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
