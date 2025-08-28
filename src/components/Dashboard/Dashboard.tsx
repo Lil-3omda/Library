@@ -93,8 +93,30 @@ export function Dashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">لوحة القيادة</h2>
-        <p className="text-gray-600">نظرة عامة على أنشطة المكتبة والقرطاسية والإحصائيات</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">لوحة القيادة - مكتبة المربد</h2>
+            <p className="text-gray-600">نظرة عامة على أنشطة المكتبة والقرطاسية والإحصائيات</p>
+          </div>
+          <div className="flex items-center gap-4 text-sm text-gray-500">
+            <a
+              href="https://instagram.com/MS__5K"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-pink-600 transition-colors"
+            >
+              @MS__5K
+            </a>
+            <a
+              href="https://t.me/ms93f"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-blue-600 transition-colors"
+            >
+              @ms93f
+            </a>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

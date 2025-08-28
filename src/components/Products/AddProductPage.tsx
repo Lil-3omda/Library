@@ -137,8 +137,8 @@ export function AddProductPage() {
       <div className="flex items-center gap-3 mb-6">
         <Package className="w-8 h-8 text-blue-600" />
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">إضافة منتج جديد</h1>
-          <p className="text-gray-600">أضف منتجاً جديداً تحت أي فئة من الفئات المتاحة</p>
+          <h1 className="text-3xl font-bold text-gray-900">إضافة منتج جديد - مكتبة المربد</h1>
+          <p className="text-gray-600">أضف منتجاً جديداً تحت أي فئة من الفئات المتاحة في مكتبة المربد</p>
         </div>
       </div>
 

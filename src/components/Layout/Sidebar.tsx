@@ -23,8 +23,8 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
     <aside className="bg-gray-900 text-white w-64 min-h-screen p-4">
       <div className="mb-8 text-center">
         <Package className="w-8 h-8 mx-auto mb-2 text-blue-400" />
-        <h2 className="text-xl font-bold">نظام إدارة القرطاسية</h2>
-        <p className="text-xs text-gray-400">متجر المكتبة المتكامل</p>
+        <h2 className="text-xl font-bold">مكتبة المربد</h2>
+        <p className="text-xs text-gray-400">نظام إدارة المكتبة والقرطاسية</p>
       </div>
       
       <nav>

@@ -57,10 +57,10 @@ export function PrintOrder({ orderData, isOpen, onClose }: PrintOrderProps) {
           <div className="text-center mb-8 print:mb-4">
             <div className="flex items-center justify-center gap-4 mb-4">
               <div className="w-16 h-16 bg-blue-600 rounded-lg flex items-center justify-center print:w-12 print:h-12">
-                <span className="text-white font-bold text-xl print:text-lg">مكتبة</span>
+                <span className="text-white font-bold text-xl print:text-lg">المربد</span>
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 print:text-2xl">مكتبة العراق</h1>
+                <h1 className="text-3xl font-bold text-gray-900 print:text-2xl">مكتبة المربد</h1>
                 <p className="text-gray-600 print:text-sm">نظام إدارة المكتبة</p>
               </div>
             </div>
@@ -157,8 +157,12 @@ export function PrintOrder({ orderData, isOpen, onClose }: PrintOrderProps) {
           {/* Footer */}
           <div className="border-t-2 border-gray-300 pt-4 text-center">
             <p className="text-sm text-gray-600 mb-2">شكراً لتعاملكم معنا</p>
+            <div className="flex justify-center gap-4 mb-2 text-xs text-gray-500">
+              <span>Instagram: @MS__5K</span>
+              <span>Telegram: @ms93f</span>
+            </div>
             <p className="text-xs text-gray-500">
-              تم إنشاء هذه الفاتورة بواسطة نظام إدارة المكتبة - مكتبة العراق
+              تم إنشاء هذه الفاتورة بواسطة نظام إدارة المكتبة - مكتبة المربد
             </p>
             <p className="text-xs text-gray-500 mt-1">
               تاريخ الطباعة: {new Date().toLocaleDateString('ar-IQ')} - {new Date().toLocaleTimeString('ar-IQ')}

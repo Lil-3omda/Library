@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LogIn, Package, Key, User } from 'lucide-react';
+import { LogIn, Package, Key, User, Instagram, Send } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 export const LoginPage: React.FC = () => {
@@ -51,7 +51,7 @@ export const LoginPage: React.FC = () => {
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white text-center">
           <Package className="w-12 h-12 mx-auto mb-2" />
-          <h1 className="text-2xl font-bold">نظام إدارة القرطاسية</h1>
+          <h1 className="text-2xl font-bold">مكتبة المربد</h1>
           <p className="text-blue-100 mt-1">بوابة الدخول الآمنة</p>
         </div>
 
@@ -116,50 +116,35 @@ export const LoginPage: React.FC = () => {
             </button>
           </form>
 
-          {/* Demo/Test Section */}
-          {/* <div className="mt-6 pt-4 border-t border-gray-200">
-            <div className="text-sm text-gray-600 mb-3">
-              <strong>النمط التجريبي:</strong>
+          </div>
+          
+          {/* Social Media Section */}
+          <div className="mt-6 pt-4 border-t border-gray-200">
+            <div className="text-sm text-gray-600 mb-3 text-center">
+              <strong>تابعنا على:</strong>
             </div>
-            
-            <div className="flex flex-col space-y-2">
-              <button
-                type="button"
-                onClick={fillAdminCredentials}
-                className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-3 rounded border transition-colors"
+            <div className="flex justify-center gap-4">
+              <a
+                href="https://instagram.com/MS__5K"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-pink-600 hover:text-pink-800 transition-colors"
               >
-تعبئة بيانات المدير
-              </button>
-              
-              <button
-                type="button"
-                onClick={() => setShowSeedData(!showSeedData)}
-                className="text-sm bg-green-100 hover:bg-green-200 text-green-800 py-2 px-3 rounded border transition-colors"
+                <Instagram className="w-5 h-5" />
+                <span className="text-sm">@MS__5K</span>
+              </a>
+              <a
+                href="https://t.me/ms93f"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors"
               >
-{showSeedData ? 'إخفاء' : 'عرض'} خيارات البيانات التجريبية
-              </button>
+                <Send className="w-5 h-5" />
+                <span className="text-sm">@ms93f</span>
+              </a>
             </div>
-
-            {showSeedData && (
-              <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded">
-                <p className="text-sm text-yellow-800 mb-2">
-                  إنشاء حساب مدير تجريبي وبيانات تجريبية:
-                </p>
-                <button
-                  onClick={handleCreateSeedData}
-                  disabled={loading}
-                  className="w-full text-sm bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-3 rounded disabled:opacity-50"
-                >
-إنشاء البيانات التجريبية
-                </button>
-                <div className="mt-2 text-xs text-yellow-700">
-                  <strong>المدير:</strong> admin@library.com / Admin123
-                </div>
-              </div>
-            )}
-          </div> */}
+          </div>
         </div>
       </div>
-    </div>
   );
 };

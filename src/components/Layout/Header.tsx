@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Bell, User, Keyboard, LogOut, Package } from 'lucide-react';
+import { Bell, User, Keyboard, LogOut, Package, Instagram, Send } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useLibrary } from '../../context/LibraryContext';
 import { useApp } from '../../context/AppContext';
@@ -84,8 +84,8 @@ export function Header() {
         <div className="flex items-center gap-3">
           <Package className="w-8 h-8 text-blue-600" />
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">نظام إدارة القرطاسية</h1>
-            <p className="text-sm text-gray-600">إضافة وإدارة المنتجات والمبيعات</p>
+            <h1 className="text-2xl font-bold text-gray-900">مكتبة المربد</h1>
+            <p className="text-sm text-gray-600">نظام إدارة المكتبة والقرطاسية</p>
           </div>
         </div>
         
@@ -128,6 +128,30 @@ export function Header() {
             <LogOut className="w-5 h-5" />
             <span className="text-sm font-medium">تسجيل الخروج</span>
           </button>
+          
+          {/* Social Media Links */}
+          <div className="flex items-center gap-2 border-r pr-4 mr-2">
+            <a
+              href="https://instagram.com/MS__5K"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-gray-600 hover:text-pink-600 px-2 py-1 rounded transition-colors"
+              title="Instagram @MS__5K"
+            >
+              <Instagram className="w-4 h-4" />
+              <span className="text-xs">@MS__5K</span>
+            </a>
+            <a
+              href="https://t.me/ms93f"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-gray-600 hover:text-blue-600 px-2 py-1 rounded transition-colors"
+              title="Telegram @ms93f"
+            >
+              <Send className="w-4 h-4" />
+              <span className="text-xs">@ms93f</span>
+            </a>
+          </div>
         </div>
       </div>
       
