@@ -51,7 +51,7 @@ export const LoginPage: React.FC = () => {
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white text-center">
           <Package className="w-12 h-12 mx-auto mb-2" />
-          <h1 className="text-2xl font-bold">مكتبة المربد</h1>
+          <h1 className="text-2xl font-bold">مكتبة المربد الجديد</h1>
           <p className="text-blue-100 mt-1">بوابة الدخول الآمنة</p>
         </div>
 

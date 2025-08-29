@@ -78,23 +78,27 @@ export function USBBarcodeInput({
       setInputValue('');
       setIsScanning(false);
       
-      // Refocus input for next scan
-      setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.focus();
-        }
-      }, 100);
+      // Refocus input for next scan (only when autoFocus is enabled)
+      if (autoFocus) {
+        setTimeout(() => {
+          if (inputRef.current) {
+            inputRef.current.focus();
+          }
+        }, 100);
+      }
     }
   };
 
   // Handle input blur - refocus automatically
   const handleBlur = () => {
     // Auto-refocus after a short delay to keep input ready for scanning
-    setTimeout(() => {
-      if (inputRef.current && !document.activeElement?.closest('.modal')) {
-        inputRef.current.focus();
-      }
-    }, 100);
+    if (autoFocus) {
+      setTimeout(() => {
+        if (inputRef.current && !document.activeElement?.closest('.modal')) {
+          inputRef.current.focus();
+        }
+      }, 100);
+    }
   };
 
   // Manual trigger for testing

@@ -164,7 +164,7 @@ export function QuickSale() {
             }
           }}
           placeholder="امسح باركود المنتج لإضافته للسلة"
-          autoFocus={true}
+          autoFocus={false}
           label="مسح المنتجات"
         />
       </div>

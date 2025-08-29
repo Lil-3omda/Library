@@ -140,7 +140,7 @@ export function BarcodeTestPage() {
                 onBarcodeScanned={handleBarcodeTest}
                 placeholder="ركز هنا وامسح باستخدام ماسح الباركود USB..."
                 label="مدخل ماسح USB"
-                autoFocus={true}
+                autoFocus={false}
               />
             </div>
 
