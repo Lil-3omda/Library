@@ -13,7 +13,7 @@ interface USBBarcodeInputProps {
 export function USBBarcodeInput({
   onBarcodeScanned,
   placeholder = "ضع المؤشر هنا وامسح الباركود",
-  autoFocus = true,
+  autoFocus = false,
   className = "",
   label = "مسح الباركود",
   showIcon = true

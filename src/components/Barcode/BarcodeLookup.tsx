@@ -31,7 +31,6 @@ export function BarcodeLookup({
       <USBBarcodeInput
         onBarcodeScanned={handleBarcodeScanned}
         placeholder="ضع المؤشر هنا وامسح الباركود للبحث"
-        autoFocus={true}
         label="مسح الباركود للبحث"
       />
     </div>

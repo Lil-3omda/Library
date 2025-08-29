@@ -43,7 +43,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const now = new Date().toISOString();
     const newProduct: Product = {
       ...productData,
-      id: Date.now().toString(),
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
       createdAt: now,
       updatedAt: now,
     };

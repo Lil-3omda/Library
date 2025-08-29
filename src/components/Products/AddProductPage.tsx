@@ -111,39 +111,40 @@ export function AddProductPage() {
     return products;
   };
 
-  const handleCSVImport = async () => {
-    if (!csvData.trim()) {
-      alert('يرجى إدخال بيانات CSV أولاً');
-      return;
-    }
-
+  const handleCSVImport = () => {
     try {
       const parsedProducts = parseCSV(csvData);
-      let successCount = 0;
-      let failedCount = 0;
+      console.log("Parsed products:", parsedProducts);
+
+      let success = 0;
       const errors: string[] = [];
 
-      for (const productData of parsedProducts) {
+      parsedProducts.forEach((p, index) => {
         try {
-          await addProduct(productData);
-          successCount++;
-        } catch (error) {
-          failedCount++;
-          errors.push(`فشل في إضافة المنتج "${productData.name}": ${error}`);
+          if (p.barcode && findProductByBarcode(p.barcode)) {
+            errors.push(`سطر ${index + 2}: الباركود ${p.barcode} مستخدم بالفعل`);
+            return;
+          }
+          addProduct(p as any);
+          success++;
+        } catch (err) {
+          errors.push(`سطر ${index + 2}: ${String(err)}`);
         }
-      }
-
-      setImportResults({
-        success: successCount,
-        failed: failedCount,
-        errors: errors.slice(0, 10) // Show only first 10 errors
       });
 
-      setCsvData('');
+      setImportResults({
+        success,
+        failed: parsedProducts.length - success,
+        errors,
+      });
+
+      alert(`تم استيراد ${success} من أصل ${parsedProducts.length} منتج`);
     } catch (error) {
-      alert('خطأ في معالجة ملف CSV. يرجى التحقق من التنسيق.');
+      console.error("Error importing CSV:", error);
+      alert(`فشل استيراد CSV: ${error}`);
     }
   };
+
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
