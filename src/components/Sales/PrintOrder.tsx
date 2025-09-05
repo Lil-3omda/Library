@@ -60,7 +60,7 @@ export function PrintOrder({ orderData, isOpen, onClose }: PrintOrderProps) {
                 <span className="text-white font-bold text-xl print:text-lg">المربد</span>
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 print:text-2xl">مكتبة المربد</h1>
+                <h1 className="text-3xl font-bold text-gray-900 print:text-2xl">مكتبة المربد الجديد</h1>
                 <p className="text-gray-600 print:text-sm">نظام إدارة المكتبة</p>
               </div>
             </div>
@@ -103,7 +103,7 @@ export function PrintOrder({ orderData, isOpen, onClose }: PrintOrderProps) {
                 <thead>
                   <tr className="bg-gray-50">
                     <th className="border border-gray-300 px-4 py-2 text-right text-sm font-medium">المنتج</th>
-                    <th className="border border-gray-300 px-4 py-2 text-right text-sm font-medium">الباركود</th>
+                    {/* <th className="border border-gray-300 px-4 py-2 text-right text-sm font-medium">الباركود</th> */}
                     <th className="border border-gray-300 px-4 py-2 text-right text-sm font-medium">الكمية</th>
                     <th className="border border-gray-300 px-4 py-2 text-right text-sm font-medium">سعر الوحدة</th>
                     <th className="border border-gray-300 px-4 py-2 text-right text-sm font-medium">المجموع</th>
@@ -113,9 +113,9 @@ export function PrintOrder({ orderData, isOpen, onClose }: PrintOrderProps) {
                   {orderData.items.map((item, index) => (
                     <tr key={index} className="hover:bg-gray-50 print:hover:bg-transparent">
                       <td className="border border-gray-300 px-4 py-2 text-sm">{item.name}</td>
-                      <td className="border border-gray-300 px-4 py-2 text-sm font-mono">
+                      {/* <td className="border border-gray-300 px-4 py-2 text-sm font-mono">
                         {item.barcode || '-'}
-                      </td>
+                      </td> */}
                       <td className="border border-gray-300 px-4 py-2 text-sm text-center">{item.quantity}</td>
                       <td className="border border-gray-300 px-4 py-2 text-sm">{item.unitPrice.toLocaleString()} د.ع</td>
                       <td className="border border-gray-300 px-4 py-2 text-sm font-medium">{item.totalPrice.toLocaleString()} د.ع</td>
@@ -124,10 +124,10 @@ export function PrintOrder({ orderData, isOpen, onClose }: PrintOrderProps) {
                 </tbody>
                 <tfoot>
                   <tr className="bg-gray-100 font-semibold">
-                    <td className="border border-gray-300 px-4 py-2 text-sm" colSpan={2}>المجموع الكلي</td>
+                    <td className="border border-gray-300 px-4 py-2 text-sm" colSpan={1}>المجموع الكلي</td>
                     <td className="border border-gray-300 px-4 py-2 text-sm text-center">{orderData.totalItems}</td>
-                    <td className="border border-gray-300 px-4 py-2 text-sm">-</td>
-                    <td className="border border-gray-300 px-4 py-2 text-sm">{orderData.totalAmount.toLocaleString()} د.ع</td>
+                    <td className="border border-gray-300 px-4 py-2 text-sm" colSpan={2}>{orderData.totalAmount.toLocaleString()} د.ع</td>
+
                   </tr>
                 </tfoot>
               </table>
@@ -145,14 +145,14 @@ export function PrintOrder({ orderData, isOpen, onClose }: PrintOrderProps) {
           )}
 
           {/* Order QR Code Placeholder */}
-          <div className="text-center mb-8 print:mb-4">
+          {/* <div className="text-center mb-8 print:mb-4">
             <div className="inline-block border-2 border-dashed border-gray-300 p-4 rounded-lg">
               <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2">
                 <span className="text-xs text-gray-500">QR Code</span>
               </div>
               <p className="text-xs text-gray-500">رمز الطلب: {orderData.id}</p>
             </div>
-          </div>
+          </div> */}
 
           {/* Footer */}
           <div className="border-t-2 border-gray-300 pt-4 text-center">

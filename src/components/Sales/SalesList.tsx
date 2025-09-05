@@ -5,15 +5,19 @@ import { SaleForm } from './SaleForm';
 import { PrintOrder } from './PrintOrder';
 
 export function SalesList() {
-  const { sales, products } = useApp();
+  const { sales, products, getLastMonthSales } = useApp();
   const [showForm, setShowForm] = useState(false);
   const [selectedDate, setSelectedDate] = useState('');
   const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [selectedSaleForPrint, setSelectedSaleForPrint] = useState<any>(null);
+  const [filterMode, setFilterMode] = useState<'all' | 'date' | 'lastMonth'>('all');
 
-  const filteredSales = selectedDate 
-    ? sales.filter(sale => sale.date.startsWith(selectedDate))
-    : sales;
+  const filteredSales =
+    filterMode === 'lastMonth'
+      ? getLastMonthSales()
+      : filterMode === 'date' && selectedDate
+        ? sales.filter(sale => sale.date.startsWith(selectedDate))
+        : sales;
 
   const totalSales = filteredSales.reduce((sum, sale) => sum + sale.totalPrice, 0);
   const totalQuantity = filteredSales.reduce((sum, sale) => sum + sale.quantity, 0);
@@ -44,11 +48,25 @@ export function SalesList() {
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
         <h2 className="text-2xl font-bold text-gray-900">المبيعات</h2>
         
-        <div className="flex gap-4">
+        <div className="flex gap-2 md:gap-4 flex-wrap items-center">
+          <button
+            onClick={() => setFilterMode('lastMonth')}
+            className={`px-3 py-2 rounded-md border transition-colors ${filterMode === 'lastMonth' ? 'bg-purple-600 text-white border-purple-600' : 'border-gray-300 hover:bg-gray-50 text-gray-700'}`}
+            title="عرض مبيعات الشهر الماضي"
+          >
+            الشهر الماضي
+          </button>
+          <button
+            onClick={() => { setFilterMode('all'); setSelectedDate(''); }}
+            className={`px-3 py-2 rounded-md border transition-colors ${filterMode === 'all' ? 'bg-gray-800 text-white border-gray-800' : 'border-gray-300 hover:bg-gray-50 text-gray-700'}`}
+            title="عرض كل المبيعات"
+          >
+            عرض الكل
+          </button>
           <input
             type="date"
             value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
+            onChange={(e) => { setSelectedDate(e.target.value); setFilterMode('date'); }}
             className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <button
@@ -126,7 +144,7 @@ export function SalesList() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredSales.reverse().map((sale) => (
+                {[...filteredSales].reverse().map((sale) => (
                   <tr key={sale.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {new Date(sale.date).toLocaleDateString('ar-IQ')}

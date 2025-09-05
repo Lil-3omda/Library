@@ -6,12 +6,12 @@ import { BarcodeInput } from '../Barcode/BarcodeInput';
 import { BarcodeGenerator } from '../Barcode/BarcodeGenerator';
 
 export function AddProductPage() {
-  const { addProduct, categories, products, findProductByBarcode } = useApp();
+  const { addProduct, updateProduct, categories, products, findProductByBarcode } = useApp();
 
   const [formData, setFormData] = useState({
     name: '',
     category: '',
-    quantity: 0,
+    quantity: 100,
     minQuantity: 5,
     costPrice: 0,
     sellingPrice: 0,
@@ -32,6 +32,7 @@ export function AddProductPage() {
     errors: string[];
   } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
 
   // Validate barcode uniqueness
   const validateBarcode = (barcode: string) => {
@@ -40,7 +41,7 @@ export function AddProductPage() {
       return true;
     }
 
-    const existingProduct = products.find(p => p.barcode === barcode.trim());
+    const existingProduct = products.find(p => p.barcode === barcode.trim() && p.id !== editingProductId);
 
     if (existingProduct) {
       setBarcodeError(`الباركود مستخدم بالفعل في المنتج: ${existingProduct.name}`);
@@ -59,13 +60,17 @@ export function AddProductPage() {
     }
 
     try {
-      await addProduct(formData);
+      if (editingProductId) {
+        updateProduct(editingProductId, formData);
+      } else {
+        await addProduct(formData);
+      }
       setIsSubmitted(true);
       // Reset form
       setFormData({
         name: '',
         category: '',
-        quantity: 0,
+        quantity: 100,
         minQuantity: 5,
         costPrice: 0,
         sellingPrice: 0,
@@ -74,11 +79,12 @@ export function AddProductPage() {
         description: '',
       });
       setBarcodeError('');
+      setEditingProductId(null);
       
       // Hide success message after 3 seconds
       setTimeout(() => setIsSubmitted(false), 3000);
     } catch (error) {
-      console.error('Error adding product:', error);
+      console.error('Error saving product:', error);
     }
   };
 
@@ -96,11 +102,22 @@ export function AddProductPage() {
           barcode: values[3]?.trim() || '',
           costPrice: parseFloat(values[5]) || 0,
           sellingPrice: parseFloat(values[7]) || 0,
-          quantity: parseInt(values[15]) || 0,
+          quantity: Math.max(0, parseInt(values[15]) || 0),
           minQuantity: parseInt(values[17]) || 5,
           supplier: values[16]?.trim() || '',
           description: values[14]?.trim() || '',
         };
+        
+        // Normalize defaults: cost and selling equality, and default quantity
+        if (product.costPrice === 0 && product.sellingPrice > 0) {
+          product.costPrice = product.sellingPrice;
+        }
+        if (product.sellingPrice === 0 && product.costPrice > 0) {
+          product.sellingPrice = product.costPrice;
+        }
+        if (!product.quantity || product.quantity <= 0) {
+          product.quantity = 100;
+        }
         
         if (product.name) {
           products.push(product);
@@ -165,12 +182,26 @@ export function AddProductPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: name === 'quantity' || name === 'minQuantity' || name === 'costPrice' || name === 'sellingPrice' 
-        ? Number(value) || 0 
-        : value
-    }));
+
+    setFormData(prev => {
+      const isNumericField = name === 'quantity' || name === 'minQuantity' || name === 'costPrice' || name === 'sellingPrice';
+      const numVal = isNumericField ? (Number(value) || 0) : undefined;
+      let next = {
+        ...prev,
+        [name]: isNumericField ? numVal! : value
+      } as typeof prev;
+
+      // Default behavior: keep cost and selling equal when one of them is still zero
+      if (name === 'sellingPrice') {
+        const s = Number(value) || 0;
+        if (prev.costPrice === 0) next.costPrice = s;
+      } else if (name === 'costPrice') {
+        const c = Number(value) || 0;
+        if (prev.sellingPrice === 0) next.sellingPrice = c;
+      }
+
+      return next;
+    });
 
     if (name === 'barcode') {
       validateBarcode(value);
@@ -200,6 +231,7 @@ export function AddProductPage() {
         barcode: existingProduct.barcode || '',
         description: existingProduct.description || '',
       });
+      setEditingProductId(existingProduct.id);
       setBarcodeError('');
       setShowExistingProductDialog(false);
       setExistingProduct(null);
@@ -209,6 +241,7 @@ export function AddProductPage() {
   const continueWithNewProduct = () => {
     setShowExistingProductDialog(false);
     setExistingProduct(null);
+    setEditingProductId(null);
   };
 
   const handleBarcodeScanned = (barcode: string) => {

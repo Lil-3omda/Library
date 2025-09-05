@@ -18,6 +18,10 @@ interface AppContextType {
   addBulkSales: (sales: Array<Omit<Sale, 'id' | 'date'>>) => void;
   getLowStockProducts: () => Product[];
   findProductByBarcode: (barcode: string) => Product | undefined;
+  // Monthly sales utilities
+  getSalesForMonth: (year: number, month: number) => Sale[]; // month: 0-11
+  getLastMonthSales: () => Sale[];
+  exportLastMonthSales: () => void;
   exportToJSON: () => void;
   importFromJSON: (jsonData: any) => void;
   isLoading: boolean;
@@ -38,6 +42,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     jsonManager.autoSave(products, sales, categories);
   }, [products, sales, categories]);
+
+  // Persist last month's sales snapshot to localStorage whenever sales change
+  useEffect(() => {
+    const now = new Date();
+    const month = now.getMonth() === 0 ? 11 : now.getMonth() - 1; // previous month
+    const year = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
+
+    const start = new Date(year, month, 1);
+    const end = new Date(year, month + 1, 1);
+    const lastMonthSales = sales.filter(sale => {
+      const d = new Date(sale.date);
+      return d >= start && d < end;
+    });
+
+    // Store snapshot for quick retrieval
+    try {
+      jsonManager.saveToStorage('sales_last_month', { sales: lastMonthSales, year, month });
+    } catch {}
+  }, [sales]);
 
   const addProduct = (productData: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => {
     const now = new Date().toISOString();
@@ -106,6 +129,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return products.filter(product => product.quantity <= product.minQuantity);
   };
 
+  // Get sales for a specific month (0-11)
+  const getSalesForMonth = (year: number, month: number) => {
+    const start = new Date(year, month, 1);
+    const end = new Date(year, month + 1, 1);
+    return sales.filter(sale => {
+      const d = new Date(sale.date);
+      return d >= start && d < end;
+    });
+  };
+
+  // Get last month's sales
+  const getLastMonthSales = () => {
+    const now = new Date();
+    const month = now.getMonth() === 0 ? 11 : now.getMonth() - 1;
+    const year = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
+    return getSalesForMonth(year, month);
+  };
+
   const findProductByBarcode = (barcode: string) => {
     if (!barcode || !barcode.trim()) return undefined;
     
@@ -129,6 +170,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
     
     const filename = jsonManager.generateBackupFilename('inventory_backup');
+    jsonManager.exportJSON(data, filename);
+  };
+
+  const exportLastMonthSales = () => {
+    const now = new Date();
+    const month = now.getMonth() === 0 ? 11 : now.getMonth() - 1;
+    const year = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
+    const lastMonthSales = getSalesForMonth(year, month);
+
+    const data = {
+      sales: lastMonthSales,
+      year,
+      month: month + 1, // human-friendly 1-12
+      exportedAt: new Date().toISOString()
+    };
+    const filename = `sales_last_month_${year}-${String(month + 1).padStart(2, '0')}.json`;
     jsonManager.exportJSON(data, filename);
   };
 
@@ -171,6 +228,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       addBulkSales,
       getLowStockProducts,
       findProductByBarcode,
+      // monthly utilities
+      getSalesForMonth,
+      getLastMonthSales,
+      exportLastMonthSales,
       exportToJSON,
       importFromJSON,
       isLoading,

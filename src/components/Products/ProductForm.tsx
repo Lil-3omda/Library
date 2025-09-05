@@ -17,7 +17,7 @@ export function ProductForm({ product, onClose }: ProductFormProps) {
   const [formData, setFormData] = useState({
     name: product?.name || '',
     category: product?.category || '',
-    quantity: product?.quantity || 0,
+    quantity: product?.quantity ?? 100,
     minQuantity: product?.minQuantity || 5,
     costPrice: product?.costPrice || 0,
     sellingPrice: product?.sellingPrice || 0,
@@ -68,10 +68,21 @@ export function ProductForm({ product, onClose }: ProductFormProps) {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'number' ? parseFloat(value) || 0 : value
-    }));
+
+    setFormData(prev => {
+      const parsed = type === 'number' ? (parseFloat(value) || 0) : value;
+      let next = {
+        ...prev,
+        [name]: parsed
+      } as typeof prev;
+
+      if (name === 'sellingPrice' && prev.costPrice === 0) {
+        next.costPrice = Number(parsed) || 0;
+      } else if (name === 'costPrice' && prev.sellingPrice === 0) {
+        next.sellingPrice = Number(parsed) || 0;
+      }
+      return next;
+    });
 
     // Validate barcode on change
     if (name === 'barcode') {
