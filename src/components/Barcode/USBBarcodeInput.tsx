@@ -172,12 +172,6 @@ export function USBBarcodeInput({
         )}
       </div>
 
-      {/* Instructions */}
-      <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
-        <p>• ضع المؤشر في الحقل أعلاه</p>
-        <p>• امسح الباركود باستخدام الماسح</p>
-        <p>• سيتم البحث تلقائياً بعد المسح</p>
-      </div>
     </div>
   );
 }

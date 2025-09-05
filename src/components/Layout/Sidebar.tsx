@@ -15,7 +15,7 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
     { id: 'users', label: 'إدارة الأعضاء', icon: Users },
     { id: 'borrows', label: 'إدارة الإعارة', icon: RotateCcw },
     { id: 'low-stock', label: 'تنبيه المخزون', icon: AlertTriangle },
-    { id: 'barcode-test', label: 'اختبار الباركود', icon: TestTube },
+    // { id: 'barcode-test', label: 'اختبار الباركود', icon: TestTube },
     { id: 'settings', label: 'الإعدادات', icon: Settings },
   ];
 

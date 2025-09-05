@@ -87,65 +87,7 @@ export function BarcodeInput({
         />
       </div>
 
-      {/* Test Mode */}
-      {showTestMode && (
-        <div className="border-t pt-4">
-          <div className="flex items-center justify-between mb-3">
-            <h4 className="text-sm font-medium text-gray-700 flex items-center gap-2">
-              <TestTube className="w-4 h-4" />
-              Test Mode
-            </h4>
-            <button
-              onClick={() => setShowTest(!showTest)}
-              className="text-sm text-blue-600 hover:text-blue-800"
-            >
-              {showTest ? 'Hide' : 'Show'} Test Options
-            </button>
-          </div>
 
-          {showTest && (
-            <div className="space-y-3 bg-gray-50 p-3 rounded-lg">
-              {/* Custom barcode test */}
-              <div>
-                <label className="block text-xs text-gray-600 mb-1">Custom Barcode Test:</label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={testBarcode}
-                    onChange={(e) => setTestBarcode(e.target.value)}
-                    placeholder="أدخل باركود تجريبي"
-                    className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
-                    onKeyPress={(e) => e.key === 'Enter' && handleTestScan()}
-                  />
-                  <button
-                    onClick={handleTestScan}
-                    className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
-                  >
-                    Simulate Scan
-                  </button>
-                </div>
-              </div>
-
-              {/* Mock barcodes */}
-              <div>
-                <label className="block text-xs text-gray-600 mb-2">Sample Book Barcodes:</label>
-                <div className="grid grid-cols-1 gap-1">
-                  {mockBarcodes.map((book) => (
-                    <button
-                      key={book.code}
-                      onClick={() => simulateScan(book.code)}
-                      className="text-left p-2 bg-white border border-gray-200 rounded hover:bg-blue-50 text-xs transition-colors"
-                    >
-                      <div className="font-mono text-blue-600">{book.code}</div>
-                      <div className="text-gray-600 truncate">{book.title}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Current value display */}
       {value && (

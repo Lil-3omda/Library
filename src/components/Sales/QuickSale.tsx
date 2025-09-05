@@ -172,12 +172,7 @@ export function QuickSale() {
 
       {/* Barcode Lookup Section */}
       <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            <Keyboard className="w-5 h-5" />
-            إضافة منتج بالماسح
-          </h3>
-        </div>
+        
 
         <USBBarcodeInput
           onBarcodeScanned={(barcode) => {
